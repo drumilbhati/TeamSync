@@ -1,20 +1,10 @@
 package store
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/drumilbhati/teamsync/models"
 )
-
-type Store struct {
-	db *sql.DB
-}
-
-// create a new store by injecting db
-func NewStore(db *sql.DB) *Store {
-	return &Store{db: db}
-}
 
 func (s *Store) GetUsers() ([]models.User, error) {
 	// we get all the rows
