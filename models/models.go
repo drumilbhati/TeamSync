@@ -16,10 +16,11 @@ type User struct {
 }
 
 type Member struct {
-	MemberID int    `json:"member_id"`
-	UserID   int    `json:"user_id"`
-	TeamID   int    `json:"team_id"`
-	Role     string `json:"role"`
+	MemberID  int       `json:"member_id"`
+	UserID    int       `json:"user_id"`
+	TeamID    int       `json:"team_id"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Team struct {

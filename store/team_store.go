@@ -98,11 +98,7 @@ func (s *Store) CreateTeam(t *models.Team) error {
 		t.TeamName, t.TeamLeaderID,
 	).Scan(&t.TeamID, &t.CreatedAt)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 /*
@@ -115,11 +111,7 @@ func (s *Store) UpdateTeamByID(team_id int, t *models.Team) error {
 		WHERE team_id = $3`,
 		t.TeamName, t.TeamLeaderID, team_id,
 	)
-
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 /*

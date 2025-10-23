@@ -35,6 +35,7 @@ func main() {
 
 	u := controllers.NewUserHandler(s)
 	t := controllers.NewTeamHandler(s)
+	m := controllers.NewMemberHandler(s)
 
 	// Define routes
 	r.HandleFunc("/users", u.GetUsers).Methods("GET")
@@ -44,11 +45,16 @@ func main() {
 	r.HandleFunc("/user/{id}", u.DeleteUserByID).Methods("DELETE")
 
 	r.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
-	r.HandleFunc("/team/user/{id}", t.GetTeamsByUserID).Methods("GET")
+	r.HandleFunc("/team", t.GetTeamsByUserID).Methods("GET").Queries("user_id", "{id}")
 	r.HandleFunc("/team", t.CreateTeam).Methods("POST")
 	r.HandleFunc("/team/{id}", t.UpdateTeamByID).Methods("PUT")
 	r.HandleFunc("/team/{id}", t.DeleteTeamByID).Methods("DELETE")
 
+	r.HandleFunc("/member/{id}", m.GetMemberByID).Methods("GET")
+	r.HandleFunc("/member", m.GetMembersByTeamID).Methods("GET").Queries("team_id", "{id}")
+	r.HandleFunc("/member", m.CreateMember).Methods("POST")
+	r.HandleFunc("/member/{id}", m.UpdateMemberByID).Methods("PUT")
+	r.HandleFunc("/member/{id}", m.DeleteMemberByID).Methods("DELETE")
 	port := os.Getenv("PORT")
 
 	if port == "" {
