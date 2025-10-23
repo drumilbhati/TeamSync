@@ -61,9 +61,11 @@ Given a user_id return all teams the user is part
 handles for team_leader_id as well, since team_leader_id references user_id
 */
 func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
-	var teams []models.Team
+	var teams = make([]models.Team, 0)
 	rows, err := s.db.Query(
-		"SELECT team_id FROM members where user_id = $1", user_id,
+		`SELECT team_id FROM members where user_id = $1
+		UNION
+		SELECT team_id FROM teams where team_leader_id = $1`, user_id,
 	)
 	if err != nil {
 		return nil, err
@@ -76,15 +78,11 @@ func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
 		if err := rows.Scan(&team.TeamID); err != nil {
 			return nil, err
 		}
-		err := s.db.QueryRow(
-			"SELECT team_name, team_leader_id, created_at FROM teams where team_id = $1",
-			team.TeamID,
-		).Scan(&team.TeamName, &team.TeamLeaderID, &team.CreatedAt)
-
+		full_team, err := s.GetTeamByID(team.TeamID)
 		if err != nil {
 			return nil, err
 		}
-		teams = append(teams, team)
+		teams = append(teams, *full_team)
 	}
 	return teams, nil
 }

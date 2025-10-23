@@ -33,14 +33,21 @@ func main() {
 
 	r := mux.NewRouter()
 
-	h := controllers.NewUserHandler(s)
+	u := controllers.NewUserHandler(s)
+	t := controllers.NewTeamHandler(s)
 
 	// Define routes
-	r.HandleFunc("/users", h.GetUsers).Methods("GET")
-	r.HandleFunc("/user/{id}", h.GetUserByID).Methods("GET")
-	r.HandleFunc("/user", h.CreateUser).Methods("POST")
-	r.HandleFunc("/user/{id}", h.UpdateUser).Methods("PUT")
-	r.HandleFunc("/user/{id}", h.DeleteUser).Methods("DELETE")
+	r.HandleFunc("/users", u.GetUsers).Methods("GET")
+	r.HandleFunc("/user/{id}", u.GetUserByID).Methods("GET")
+	r.HandleFunc("/user", u.CreateUser).Methods("POST")
+	r.HandleFunc("/user/{id}", u.UpdateUserByID).Methods("PUT")
+	r.HandleFunc("/user/{id}", u.DeleteUserByID).Methods("DELETE")
+
+	r.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
+	r.HandleFunc("/team/user/{id}", t.GetTeamsByUserID).Methods("GET")
+	r.HandleFunc("/team", t.CreateTeam).Methods("POST")
+	r.HandleFunc("/team/{id}", t.UpdateTeamByID).Methods("PUT")
+	r.HandleFunc("/team/{id}", t.DeleteTeamByID).Methods("DELETE")
 
 	port := os.Getenv("PORT")
 

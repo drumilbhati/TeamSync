@@ -1,5 +1,22 @@
 package store
 
+/*
+	APIs needed:
+	GET:
+	GetUsers
+	GetUserByID
+	GetUserByEmail
+
+	POST:
+	CreateUser
+
+	PUT:
+	UpdateUserByID
+
+	DELETE:
+	DeleteUserByID
+*/
+
 import (
 	"time"
 
@@ -45,6 +62,21 @@ func (s *Store) GetUserByID(id int) (*models.User, error) {
 	return &u, nil
 }
 
+func (s *Store) GetUserByEmail(email string) (*models.User, error) {
+	var u models.User
+
+	err := s.db.QueryRow(
+		"SELECT user_id, user_name, email, role, created_at, updated_at FROM users WHERE email = $1",
+		email,
+	).Scan(&u.UserID, &u.UserName, &u.Email, &u.Role, &u.CreatedAt, &u.UpdatedAt)
+
+	if err != nil {
+		return nil, err
+	}
+	u.Password = ""
+	return &u, nil
+}
+
 func (s *Store) CreateUser(u *models.User) error {
 	err := s.db.QueryRow(
 		`INSERT INTO users (user_name, email, password, role) 
@@ -60,7 +92,7 @@ func (s *Store) CreateUser(u *models.User) error {
 	return nil
 }
 
-func (s *Store) UpdateUser(id int, u *models.User) error {
+func (s *Store) UpdateUserByID(id int, u *models.User) error {
 	_, err := s.db.Exec(
 		`UPDATE users
 		SET user_name = $1, email = $2, password = $3, role = $4, updated_at = $5
@@ -70,7 +102,7 @@ func (s *Store) UpdateUser(id int, u *models.User) error {
 	return err
 }
 
-func (s *Store) DeleteUser(id int) error {
+func (s *Store) DeleteUserByID(id int) error {
 	_, err := s.db.Exec(
 		"DELETE FROM users WHERE user_id = $1", id,
 	)

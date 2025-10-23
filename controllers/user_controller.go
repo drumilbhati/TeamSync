@@ -36,6 +36,11 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(params["id"])
 
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	user, err := h.store.GetUserByID(id)
 
 	if err != nil {
@@ -61,7 +66,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("User created successfully")
 }
 
-func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	id, err := strconv.Atoi(params["id"])
@@ -75,7 +80,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&user)
 
-	if err := h.store.UpdateUser(id, &user); err != nil {
+	if err := h.store.UpdateUserByID(id, &user); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -84,7 +89,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("Updated user successfully")
 }
 
-func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	id, err := strconv.Atoi(params["id"])
@@ -94,7 +99,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.store.DeleteUser(id); err != nil {
+	if err := h.store.DeleteUserByID(id); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
