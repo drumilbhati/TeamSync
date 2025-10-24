@@ -66,14 +66,13 @@ func (s *Store) GetUserByEmail(email string) (*models.User, error) {
 	var u models.User
 
 	err := s.db.QueryRow(
-		"SELECT user_id, user_name, email, role, created_at, updated_at FROM users WHERE email = $1",
+		"SELECT user_id, user_name, email, password, role, created_at, updated_at FROM users WHERE email = $1",
 		email,
-	).Scan(&u.UserID, &u.UserName, &u.Email, &u.Role, &u.CreatedAt, &u.UpdatedAt)
+	).Scan(&u.UserID, &u.UserName, &u.Email, &u.Password, &u.Role, &u.CreatedAt, &u.UpdatedAt)
 
 	if err != nil {
 		return nil, err
 	}
-	u.Password = ""
 	return &u, nil
 }
 

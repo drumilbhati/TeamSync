@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/drumilbhati/teamsync/controllers"
+	"github.com/drumilbhati/teamsync/controllers/middleware"
 	"github.com/drumilbhati/teamsync/database"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/gorilla/mux"
@@ -38,23 +39,37 @@ func main() {
 	m := controllers.NewMemberHandler(s)
 
 	// Define routes
-	r.HandleFunc("/users", u.GetUsers).Methods("GET")
-	r.HandleFunc("/user/{id}", u.GetUserByID).Methods("GET")
-	r.HandleFunc("/user", u.CreateUser).Methods("POST")
-	r.HandleFunc("/user/{id}", u.UpdateUserByID).Methods("PUT")
-	r.HandleFunc("/user/{id}", u.DeleteUserByID).Methods("DELETE")
 
-	r.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
-	r.HandleFunc("/team", t.GetTeamsByUserID).Methods("GET").Queries("user_id", "{id}")
-	r.HandleFunc("/team", t.CreateTeam).Methods("POST")
-	r.HandleFunc("/team/{id}", t.UpdateTeamByID).Methods("PUT")
-	r.HandleFunc("/team/{id}", t.DeleteTeamByID).Methods("DELETE")
+	// --- Public Auth Routes (changed prefix to /auth) ---
+	r.HandleFunc("/auth/register", u.CreateUser).Methods("POST")
+	r.HandleFunc("/auth/login", u.Login).Methods("POST")
 
-	r.HandleFunc("/member/{id}", m.GetMemberByID).Methods("GET")
-	r.HandleFunc("/member", m.GetMembersByTeamID).Methods("GET").Queries("team_id", "{id}")
-	r.HandleFunc("/member", m.CreateMember).Methods("POST")
-	r.HandleFunc("/member/{id}", m.UpdateMemberByID).Methods("PUT")
-	r.HandleFunc("/member/{id}", m.DeleteMemberByID).Methods("DELETE")
+	// --- Protected API Routes ---
+	// Create a subrouter that uses auth middleware
+	api := r.PathPrefix("/api").Subrouter()
+	api.Use(middleware.AuthMiddleware)
+
+	// User routes (paths are now relative to /api)
+	api.HandleFunc("/users", u.GetUsers).Methods("GET")
+	api.HandleFunc("/user/{id}", u.GetUserByID).Methods("GET")
+	api.HandleFunc("/user/{id}", u.UpdateUserByID).Methods("PUT")
+	api.HandleFunc("/user/{id}", u.DeleteUserByID).Methods("DELETE")
+
+	// Team routes
+	api.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
+	api.HandleFunc("/team", t.GetTeamsByUserID).Methods("GET").Queries("user_id", "{id}")
+	api.HandleFunc("/team", t.CreateTeam).Methods("POST")
+	api.HandleFunc("/team/{id}", t.UpdateTeamByID).Methods("PUT")
+	api.HandleFunc("/team/{id}", t.DeleteTeamByID).Methods("DELETE")
+
+	// Member routes
+	api.HandleFunc("/member/{id}", m.GetMemberByID).Methods("GET")
+	api.HandleFunc("/member", m.GetMembersByTeamID).Methods("GET").Queries("team_id", "{id}")
+	api.HandleFunc("/member", m.CreateMember).Methods("POST")
+	api.HandleFunc("/member/{id}", m.UpdateMemberByID).Methods("PUT")
+	api.HandleFunc("/member/{id}", m.DeleteMemberByID).Methods("DELETE")
+
+	// --- Start Server ---
 	port := os.Getenv("PORT")
 
 	if port == "" {
