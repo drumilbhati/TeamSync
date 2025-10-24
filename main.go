@@ -24,13 +24,20 @@ func main() {
 		os.Getenv("DB_NAME"),
 	)
 
-	s := store.NewStore(db)
-
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
 	}
 
+	rdb, err := database.ConnectRedis()
+
+	if err != nil {
+		log.Fatal("Failed to connect ot redis", err)
+	}
+
+	s := store.NewStore(db, rdb)
+
 	defer database.Close(db)
+	defer database.CloseRedis(rdb)
 
 	r := mux.NewRouter()
 
