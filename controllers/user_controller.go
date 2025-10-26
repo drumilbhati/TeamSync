@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
+	"github.com/drumilbhati/teamsync/utils"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -66,6 +68,18 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	existingUser, err := h.store.GetUserByEmailForAuth(user.Email)
+
+	if err != nil && err != sql.ErrNoRows {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if existingUser != nil && existingUser.IsVerified {
+		http.Error(w, "Email already in use", http.StatusConflict)
+		return
+	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 
 	if err != nil {
@@ -75,14 +89,86 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = string(hashedPassword)
 
-	if err := h.store.CreateUser(&user); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if existingUser != nil {
+		user.UserID = existingUser.UserID
+	} else {
+		if err := h.store.CreateUser(&user); err != nil {
+			http.Error(w, "Failed to create user", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	otp := store.GenerateOTP()
+
+	if err := h.store.CreateOTP(user.UserID, otp); err != nil {
+		http.Error(w, "Failed to save OTP to Redis", http.StatusInternalServerError)
 		return
 	}
+
+	// Send OTP email asynchronously (so API returns fast)
+	go func() {
+		err := utils.SendOTP(user.Email, user.UserName, otp)
+		if err != nil {
+			log.Printf("Failed to send OTP email to %s: %w\n", user.Email, err)
+		} else {
+			log.Printf("OTP email send to %s\n", user.Email)
+		}
+	}()
 
 	user.Password = ""
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(user)
+}
+
+func (h *UserHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+		OTP   string `json:"otp"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	user, err := h.store.GetUserByEmailForAuth(req.Email)
+	if err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if user.IsVerified {
+		http.Error(w, "User already verified", http.StatusBadRequest)
+		return
+	}
+
+	// check OTP from Redis
+	isValid, err := h.store.GetValidOTP(user.UserID, req.OTP)
+	if err != nil {
+		http.Error(w, "Error checking OTP", http.StatusInternalServerError)
+		return
+	}
+
+	if !isValid {
+		http.Error(w, "Invalid or expired OTP", http.StatusBadRequest)
+		return
+	}
+
+	// mark as verified in SQL
+	if err := h.store.VerifyUser(user.UserID); err != nil {
+		http.Error(w, "Failed to verify user", http.StatusInternalServerError)
+		return
+	}
+
+	// delete the OTP from redis
+	if err := h.store.DeleteOTP(user.UserID); err != nil {
+		log.Printf("Warning: Failed to delete OTP for user %d: %w", user.UserID, err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Email verified successfully. Please log in.",
+	})
 }
 
 func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -102,6 +188,8 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		} else if err.Error() == "user not verified" {
+			http.Error(w, "Account not verified. Please check your email.", http.StatusUnauthorized)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}

@@ -6,13 +6,14 @@ import (
 )
 
 type User struct {
-	UserID    int          `json:"user_id"`
-	UserName  string       `json:"user_name"`
-	Email     string       `json:"email"`
-	Password  string       `json:"password"`
-	Role      string       `json:"role"`
-	CreatedAt time.Time    `json:"created_at"`
-	UpdatedAt sql.NullTime `json:"updated_at"`
+	UserID     int          `json:"user_id"`
+	UserName   string       `json:"user_name"`
+	Email      string       `json:"email"`
+	Password   string       `json:"password"`
+	Role       string       `json:"role"`
+	CreatedAt  time.Time    `json:"created_at"`
+	UpdatedAt  sql.NullTime `json:"updated_at"`
+	IsVerified bool         `json:"is_verified"`
 }
 
 type Member struct {

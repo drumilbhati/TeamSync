@@ -50,6 +50,7 @@ func main() {
 	// --- Public Auth Routes (changed prefix to /auth) ---
 	r.HandleFunc("/auth/register", u.CreateUser).Methods("POST")
 	r.HandleFunc("/auth/login", u.Login).Methods("POST")
+	r.HandleFunc("/auth/verify", u.VerifyEmail).Methods("POST")
 
 	// --- Protected API Routes ---
 	// Create a subrouter that uses auth middleware
