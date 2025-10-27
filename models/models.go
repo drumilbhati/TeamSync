@@ -31,3 +31,34 @@ type Team struct {
 	Members      []Member  `json:"members"`
 	CreatedAt    time.Time `json:"created_at"`
 }
+
+type TaskStatus string
+
+const (
+	TaskStatusTodo       TaskStatus = "todo"
+	TaskStatusInProgress TaskStatus = "in_progress"
+	TaskStatusInReview   TaskStatus = "in_review"
+	TaskStatusDone       TaskStatus = "done"
+)
+
+type TaskPriority string
+
+const (
+	TaskPriorityLow    TaskPriority = "low"
+	TaskPriorityMedium TaskPriority = "medium"
+	TaskPriorityHigh   TaskPriority = "high"
+)
+
+type Task struct {
+	TaskID      int            `json:"task_id"`
+	TeamID      int            `json:"team_id"`
+	CreatorID   int            `json:"creator_id"`
+	AssigneeID  sql.NullInt64  `json:"assignee_id"`
+	Title       string         `json:"title"`
+	Description sql.NullString `json:"description"`
+	Status      TaskStatus     `json:"status"`
+	Priority    TaskPriority   `json:"priority"`
+	DueDate     sql.NullTime   `json:"due_date"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
+}
