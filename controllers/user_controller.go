@@ -109,7 +109,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	go func() {
 		err := utils.SendOTP(user.Email, user.UserName, otp)
 		if err != nil {
-			log.Printf("Failed to send OTP email to %s: %w\n", user.Email, err)
+			log.Printf("Failed to send OTP email to %s: %s\n", user.Email, err)
 		} else {
 			log.Printf("OTP email send to %s\n", user.Email)
 		}
@@ -162,7 +162,7 @@ func (h *UserHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 	// delete the OTP from redis
 	if err := h.store.DeleteOTP(user.UserID); err != nil {
-		log.Printf("Warning: Failed to delete OTP for user %d: %w", user.UserID, err)
+		log.Printf("Warning: Failed to delete OTP for user %d: %s", user.UserID, err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

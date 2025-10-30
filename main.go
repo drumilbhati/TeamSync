@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/drumilbhati/teamsync/controllers"
-	"github.com/drumilbhati/teamsync/controllers/middleware"
 	"github.com/drumilbhati/teamsync/database"
+	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -44,6 +44,7 @@ func main() {
 	u := controllers.NewUserHandler(s)
 	t := controllers.NewTeamHandler(s)
 	m := controllers.NewMemberHandler(s)
+	k := controllers.NewTaskHandler(s)
 
 	// Define routes
 
@@ -76,6 +77,13 @@ func main() {
 	api.HandleFunc("/member", m.CreateMember).Methods("POST")
 	api.HandleFunc("/member/{id}", m.UpdateMemberByID).Methods("PUT")
 	api.HandleFunc("/member/{id}", m.DeleteMemberByID).Methods("DELETE")
+
+	// Task routes
+	api.HandleFunc("/task/{id}", k.GetTaskByTaskID).Methods("GET")
+	api.HandleFunc("/task", k.GetTasksByTeamID).Methods("GET").Queries("team_id", "{id}")
+	api.HandleFunc("/task", k.CreateTask).Methods("POST")
+	api.HandleFunc("/task/{id}", k.UpdateTaskByID).Methods("PUT")
+	api.HandleFunc("/task/{id}", k.DeleteTaskByID).Methods("DELETE")
 
 	// --- Start Server ---
 	port := os.Getenv("PORT")
