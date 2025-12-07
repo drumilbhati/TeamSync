@@ -54,7 +54,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		// 5. (Optional but recommended) Add user info to context
-		// This allows handlers to know *who* is making the request
+		// This allows handlers to know who is making the request
 		userID, ok := claims["user_id"].(float64) // JWT parses numbers as float64
 		if !ok {
 			http.Error(w, "Invalid user_id in token", http.StatusUnauthorized)

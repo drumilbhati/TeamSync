@@ -62,3 +62,12 @@ type Task struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }
+
+type Comment struct {
+	CommentID int       `json:"comment_id"`
+	TaskID    int       `json:"task_id"`
+	UserID    int       `json:"user_id"`
+	UserName  string    `json:"user_name,omitempty"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+}
