@@ -84,11 +84,6 @@ func main() {
 	api.HandleFunc("/task", k.CreateTask).Methods("POST")
 	api.HandleFunc("/task/{id}", k.UpdateTaskByID).Methods("PUT")
 	api.HandleFunc("/task/{id}", k.DeleteTaskByID).Methods("DELETE")
-
-	// Comment routes
-	api.HandleFunc("/task/{id}/comments", c.GetCommentsByTaskID).Methods("GET")
-	api.HandleFunc("/task/{id}/comments", c.CreateComment).Methods("POST")
-
 	// --- Start Server ---
 	port := os.Getenv("PORT")
 
