@@ -30,7 +30,8 @@ func (s *Store) GetCommentsByTaskID(taskID int) ([]models.Comment, error) {
 
 	defer rows.Close()
 
-	var comments []models.Comment
+	comments := []models.Comment{}
+
 	for rows.Next() {
 		var c models.Comment
 		if err := rows.Scan(&c.CommentID, &c.TaskID, &c.UserID, &c.UserName, &c.Content, &c.CreatedAt); err != nil {

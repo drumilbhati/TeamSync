@@ -45,6 +45,7 @@ func main() {
 	t := controllers.NewTeamHandler(s)
 	m := controllers.NewMemberHandler(s)
 	k := controllers.NewTaskHandler(s)
+	c := controllers.NewCommentHander(s)
 
 	// Define routes
 
@@ -84,7 +85,12 @@ func main() {
 	api.HandleFunc("/task", k.CreateTask).Methods("POST")
 	api.HandleFunc("/task/{id}", k.UpdateTaskByID).Methods("PUT")
 	api.HandleFunc("/task/{id}", k.DeleteTaskByID).Methods("DELETE")
-	// --- Start Server ---
+
+	// Comment routes
+	api.HandleFunc("/comment", c.CreateComment).Methods("POST")
+	api.HandleFunc("/comment/{task_id}", c.GetCommentsByTaskID).Methods("GET")
+
+	//  --- Start Server ---
 	port := os.Getenv("PORT")
 
 	if port == "" {
