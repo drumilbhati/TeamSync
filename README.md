@@ -1,81 +1,120 @@
 # TeamSync
 
-TeamSync is a backend service built with Go (Golang) for managing users, teams, and team memberships. It provides a RESTful API for all standard CRUD (Create, Read, Update, Delete) operations, built on a robust relational model with a PostgreSQL database.
+TeamSync is a robust backend service built with **Go (Golang)** for managing collaborative team workflows. It features a complete system for users, teams, memberships, tasks, and comments, backed by a **PostgreSQL** database for relational data and **Redis** for high-performance caching/session management.
 
-This service is built using a clean, modular architecture with `gorilla/mux` for routing, `pq` as the PostgreSQL driver, and a clear separation of concerns between `controllers`, `models`, and the `store` (data access layer).
+The project follows a clean, modular architecture, utilizing `gorilla/mux` for routing and separating concerns into controllers, models, and data access layers (store).
 
 ---
 
 ## Features
 
-* **User Management:** Full CRUD operations for platform users.
-* **Team Management:** Full CRUD operations for teams.
-* **Membership Management:** A relational-driven system to associate users with teams and define their roles.
-* **Data Integrity:** Utilizes foreign key constraints in PostgreSQL to ensure relationships (like `team_leader` and `members`) are valid.
-* **Configuration-driven:** Uses a `.env` file for all database and server configurations.
+*   **Authentication:** Secure registration and login with JWT-based session management.
+*   **User Management:** Create, view, update, and delete user profiles.
+*   **Team & Membership:** Create teams, assign leaders, and manage team members with specific roles.
+*   **Task Management:** Full lifecycle management for tasks (Create, Read, Update, Delete) with statuses (Todo, In Progress, Done) and priorities.
+*   **Comments:** Collaboration features allowing users to add comments to specific tasks.
+*   **Performance:** Redis integration for optimized data handling.
 
 ---
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your local machine:
-* [Go](https://go.dev/doc/install) (version 1.18 or later)
-* [PostgreSQL](https://www.postgresql.org/download/)
-* A tool to run SQL scripts (like `psql` or a GUI like DBeaver)
+Before running the project, ensure you have the following installed:
+
+*   **[Go](https://go.dev/doc/install)** (version 1.22 or later)
+*   **[PostgreSQL](https://www.postgresql.org/download/)**
+*   **[Redis](https://redis.io/docs/install/install-redis/)**
 
 ---
 
-## Installation and Setup
+## Installation & Setup
 
 1.  **Clone the Repository**
     ```bash
-    git clone [https://github.com/drumilbhati/teamsync.git](https://github.com/drumilbhati/teamsync.git)
+    git clone https://github.com/drumilbhati/teamsync.git
     cd teamsync
     ```
 
 2.  **Install Dependencies**
-    This will download `gorilla/mux`, `godotenv`, and the `pq` driver.
     ```bash
     go mod tidy
     ```
 
-3.  **Database Setup**
-    * Ensure your PostgreSQL server is running.
-    * Create a database for the project.
+3.  **Database Configuration**
+    *   **PostgreSQL:** Create a database named `teamsync` and run your schema migration scripts.
         ```sql
         CREATE DATABASE teamsync;
         ```
-    * **Important:** Apply your database schema. You must run your `schema.sql` file (which contains your `CREATE TABLE` statements) against the new database.
-        ```bash
-        # Example command:
-        psql -d teamsync -f path/to/your/schema.sql
-        ```
+    *   **Redis:** Ensure your Redis server is running (default: `localhost:6379`).
 
-4.  **Configure Environment Variables**
-    Create a `.env` file in the root of the project:
-    ```bash
-    touch .env
-    ```
-    Add your database and server configuration to the `.env` file.
+4.  **Environment Variables**
+    Create a `.env` file in the root directory and populate it with your configuration:
 
-    **.env Example:**
     ```ini
-    # Server Port
+    # Server Configuration
     PORT=8080
 
-    # PostgreSQL Database Configuration
+    # PostgreSQL Configuration
     DB_HOST=localhost
     DB_PORT=5432
     DB_USER=your_postgres_user
     DB_PASSWORD=your_postgres_password
     DB_NAME=teamsync
+
+    # Redis Configuration
+    REDIS_ADDR=localhost:6379
+    REDIS_PASSWORD=
+    REDIS_DB=0
     ```
 
 ---
 
 ## Running the Application
 
-Once your database is running and your `.env` file is configured, you can start the server:
+Start the server using:
 
 ```bash
 go run main.go
+```
+
+The server will start (default port: `8080`).
+
+---
+
+## API Endpoints
+
+### Authentication
+*   `POST /auth/register` - Register a new user
+*   `POST /auth/login` - Login and receive a JWT
+*   `POST /auth/verify` - Verify user email
+
+### Users (Protected)
+*   `GET    /api/users` - List all users
+*   `GET    /api/user/{id}` - Get user details
+*   `PUT    /api/user/{id}` - Update user details
+*   `DELETE /api/user/{id}` - Delete a user
+
+### Teams (Protected)
+*   `POST   /api/team` - Create a new team
+*   `GET    /api/team?user_id={id}` - Get teams for a specific user
+*   `GET    /api/team/{id}` - Get specific team details
+*   `PUT    /api/team/{id}` - Update a team
+*   `DELETE /api/team/{id}` - Delete a team
+
+### Members (Protected)
+*   `POST   /api/member` - Add a member to a team
+*   `GET    /api/member?team_id={id}` - Get all members of a team
+*   `GET    /api/member/{id}` - Get specific membership details
+*   `PUT    /api/member/{id}` - Update membership role
+*   `DELETE /api/member/{id}` - Remove a member
+
+### Tasks (Protected)
+*   `POST   /api/task` - Create a new task
+*   `GET    /api/task?team_id={id}` - Get all tasks for a team
+*   `GET    /api/task/{id}` - Get specific task details
+*   `PUT    /api/task/{id}` - Update a task (status, assignee, etc.)
+*   `DELETE /api/task/{id}` - Delete a task
+
+### Comments (Protected)
+*   `POST   /api/comment` - Add a comment to a task
+*   `GET    /api/comment/{task_id}` - Get all comments for a specific task
