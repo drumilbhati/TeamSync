@@ -45,7 +45,6 @@ func main() {
 	t := controllers.NewTeamHandler(s)
 	m := controllers.NewMemberHandler(s)
 	k := controllers.NewTaskHandler(s)
-	c := controllers.NewCommentHandler(s)
 
 	// Define routes
 
