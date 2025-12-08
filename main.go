@@ -68,6 +68,7 @@ func main() {
 	// Team routes
 	api.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
 	api.HandleFunc("/team", t.GetTeamsByUserID).Methods("GET").Queries("user_id", "{id}")
+	api.HandleFunc("/team", t.GetTeamsByTeamLeaderID).Methods("GET").Queries("team_leader_id", "{id}")
 	api.HandleFunc("/team", t.CreateTeam).Methods("POST")
 	api.HandleFunc("/team/{id}", t.UpdateTeamByID).Methods("PUT")
 	api.HandleFunc("/team/{id}", t.DeleteTeamByID).Methods("DELETE")
