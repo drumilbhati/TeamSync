@@ -40,6 +40,27 @@ func (h *TeamHandler) GetTeamByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(team)
 }
 
+func (h *TeamHandler) GetTeamsByTeamLeaderID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+
+	team_leader_id, err := strconv.Atoi(params["id"])
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	teams, err := h.store.GetTeamsByTeamLeaderID(team_leader_id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(teams)
+}
+
 func (h *TeamHandler) GetTeamsByUserID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
@@ -50,7 +71,7 @@ func (h *TeamHandler) GetTeamsByUserID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	team, err := h.store.GetTeamsByUserID(user_id)
+	teams, err := h.store.GetTeamsByUserID(user_id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -58,7 +79,7 @@ func (h *TeamHandler) GetTeamsByUserID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(team)
+	json.NewEncoder(w).Encode(teams)
 }
 
 func (h *TeamHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {

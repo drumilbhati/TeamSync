@@ -4,6 +4,7 @@ package store
 	APIs needed:
 	GET:
 	GetTeamByID
+	GetTeamsByTeamLeaderID
 	GetTeamsByUserID
 
 	POST:
@@ -60,12 +61,13 @@ func (s *Store) GetTeamByID(team_id int) (*models.Team, error) {
 Given a user_id return all teams the user is part
 handles for team_leader_id as well, since team_leader_id references user_id
 */
-func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
+func (s *Store) GetTeamsByTeamLeaderID(team_leader_id int) ([]models.Team, error) {
 	var teams = make([]models.Team, 0)
 	rows, err := s.db.Query(
-		`SELECT team_id FROM members where user_id = $1
-		UNION
-		SELECT team_id FROM teams where team_leader_id = $1`, user_id,
+		`SELECT t.team_id, t.team_name, t.team_leader_id, t.created_at
+			FROM teams t WHERE t.team_leader_id = $1
+		`,
+		team_leader_id,
 	)
 	if err != nil {
 		return nil, err
@@ -74,16 +76,39 @@ func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var team models.Team
-		if err := rows.Scan(&team.TeamID); err != nil {
+		var t models.Team
+		if err := rows.Scan(&t.TeamID, &t.TeamName, &t.TeamLeaderID, &t.CreatedAt); err != nil {
 			return nil, err
 		}
-		full_team, err := s.GetTeamByID(team.TeamID)
-		if err != nil {
-			return nil, err
-		}
-		teams = append(teams, *full_team)
+		teams = append(teams, t)
 	}
+	return teams, nil
+}
+
+func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
+	teams := []models.Team{}
+	rows, err := s.db.Query(
+		`SELECT DISTINCT t.team_id, t.team_name, t.team_leader_id, t.created_at
+		FROM teams t
+		LEFT JOIN members m ON t.team_id = m.team_id
+		WHERE m.user_id = $1 OR t.team_leader_id = $1`,
+		user_id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var t models.Team
+		t.Members = []models.Member{}
+		if err := rows.Scan(&t.TeamID, &t.TeamName, &t.TeamLeaderID, &t.CreatedAt); err != nil {
+			return nil, err
+		}
+		teams = append(teams, t)
+	}
+
 	return teams, nil
 }
 
@@ -107,7 +132,7 @@ Given a team_id update its details
 func (s *Store) UpdateTeamByID(team_id int, t *models.Team) error {
 	_, err := s.db.Exec(
 		`UPDATE teams
-		SET team_name = $1, team_leader_id = $2 
+		SET team_name = $1, team_leader_id = $2
 		WHERE team_id = $3`,
 		t.TeamName, t.TeamLeaderID, team_id,
 	)
