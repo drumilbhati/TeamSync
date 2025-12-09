@@ -67,6 +67,7 @@ func main() {
 
 	// Team routes
 	api.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
+	// TODO: take the user_id from ctx, rather than passing as a param
 	api.HandleFunc("/team", t.GetTeamsByUserID).Methods("GET").Queries("user_id", "{id}")
 	api.HandleFunc("/team", t.GetTeamsByTeamLeaderID).Methods("GET").Queries("team_leader_id", "{id}")
 	api.HandleFunc("/team", t.CreateTeam).Methods("POST")
