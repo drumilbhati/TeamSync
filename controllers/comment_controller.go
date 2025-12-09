@@ -76,13 +76,13 @@ func (c *CommentHandler) GetCommentsByTaskID(w http.ResponseWriter, r *http.Requ
 }
 
 func (c *CommentHandler) UpdateCommentByID(w http.ResponseWriter, r *http.Request) {
-	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
-	
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	
+
 	params := mux.Vars(r)
 
 	comment_id, err := strconv.Atoi(params["id"])
@@ -98,7 +98,7 @@ func (c *CommentHandler) UpdateCommentByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if requesterID != comment.UserID {
+	if requester_id != comment.UserID {
 		http.Error(w, "Unauthorized: You can only update your own comment", http.StatusForbidden)
 		return
 	}
@@ -127,7 +127,7 @@ func (c *CommentHandler) UpdateCommentByID(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *CommentHandler) DeleteCommentByID(w http.ResponseWriter, r *http.Request) {
-	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
@@ -148,7 +148,7 @@ func (c *CommentHandler) DeleteCommentByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if requesterID != comment.UserID {
+	if requester_id != comment.UserID {
 		http.Error(w, "Unauthorized: You can only delete your own comment", http.StatusForbidden)
 		return
 	}
