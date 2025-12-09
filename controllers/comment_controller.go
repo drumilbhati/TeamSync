@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/gorilla/mux"
@@ -72,4 +73,92 @@ func (c *CommentHandler) GetCommentsByTaskID(w http.ResponseWriter, r *http.Requ
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comments)
+}
+
+func (c *CommentHandler) UpdateCommentByID(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	
+	params := mux.Vars(r)
+
+	comment_id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	comment, err := c.store.GetCommentbyID(comment_id)
+
+	if err != nil {
+		http.Error(w, "Comment with given id not found", http.StatusNotFound)
+		return
+	}
+
+	if requesterID != comment.UserID {
+		http.Error(w, "Unauthorized: You can only update your own comment", http.StatusForbidden)
+		return
+	}
+
+	var updated_comment models.Comment
+	if err := json.NewDecoder(r.Body).Decode(&updated_comment); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if updated_comment.Content == "" {
+		http.Error(w, "Content cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	err = c.store.UpdateCommentByID(comment_id, &updated_comment)
+
+	if err != nil {
+		http.Error(w, "Error updating comment", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Comment updated successfully")
+}
+
+func (c *CommentHandler) DeleteCommentByID(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	params := mux.Vars(r)
+
+	comment_id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	comment, err := c.store.GetCommentbyID(comment_id)
+
+	if err != nil {
+		http.Error(w, "Comment with given id not found", http.StatusNotFound)
+		return
+	}
+
+	if requesterID != comment.UserID {
+		http.Error(w, "Unauthorized: You can only delete your own comment", http.StatusForbidden)
+		return
+	}
+
+	err = c.store.DeleteCommentByID(comment_id)
+
+	if err != nil {
+		http.Error(w, "Error deleting comment", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
