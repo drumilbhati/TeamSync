@@ -15,7 +15,7 @@ type CommentHandler struct {
 	store *store.Store
 }
 
-func NewCommentHander(s *store.Store) *CommentHandler {
+func NewCommentHandler(s *store.Store) *CommentHandler {
 	return &CommentHandler{store: s}
 }
 
