@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/drumilbhati/teamsync/utils"
@@ -225,12 +226,22 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(r)
 
-	id, err := strconv.Atoi(params["id"])
+	user_id, err := strconv.Atoi(params["id"])
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if user_id != requester_id {
+		http.Error(w, "Unauthorized: you can edit only your profile", http.StatusForbidden)
 		return
 	}
 
@@ -238,7 +249,7 @@ func (h *UserHandler) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 
 	json.NewDecoder(r.Body).Decode(&user)
 
-	if err := h.store.UpdateUserByID(id, &user); err != nil {
+	if err := h.store.UpdateUserByID(user_id, &user); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
@@ -248,16 +259,27 @@ func (h *UserHandler) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 
-	id, err := strconv.Atoi(params["id"])
+	user_id, err := strconv.Atoi(params["id"])
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	if err := h.store.DeleteUserByID(id); err != nil {
+	if user_id != requester_id {
+		http.Error(w, "Unauthorized: you can delete only your profile", http.StatusForbidden)
+		return
+	}
+
+	if err := h.store.DeleteUserByID(user_id); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}

@@ -95,8 +95,8 @@ func (s *Store) VerifyUser(userID int) error {
 
 func (s *Store) CreateUser(u *models.User) error {
 	err := s.db.QueryRow(
-		`INSERT INTO users (user_name, email, password, role) 
-		VALUES ($1, $2, $3, $4) 
+		`INSERT INTO users (user_name, email, password, role)
+		VALUES ($1, $2, $3, $4)
 		RETURNING user_id, created_at`,
 		u.UserName, u.Email, u.Password, u.Role,
 	).Scan(&u.UserID, &u.CreatedAt)
