@@ -12,18 +12,20 @@ import (
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
-	"github.com/drumilbhati/teamsync/utils"
+	"github.com/drumilbhati/teamsync/worker"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/mux"
+	"github.com/hibiken/asynq"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserHandler struct {
-	store *store.Store
+	store  *store.Store
+	client *asynq.Client
 }
 
-func NewUserHandler(s *store.Store) *UserHandler {
-	return &UserHandler{store: s}
+func NewUserHandler(s *store.Store, c *asynq.Client) *UserHandler {
+	return &UserHandler{store: s, client: c}
 }
 
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
@@ -106,15 +108,16 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Send OTP email asynchronously (so API returns fast)
-	go func() {
-		err := utils.SendOTP(user.Email, user.UserName, otp)
-		if err != nil {
-			log.Printf("Failed to send OTP email to %s: %s\n", user.Email, err)
-		} else {
-			log.Printf("OTP email send to %s\n", user.Email)
-		}
-	}()
+	task, err := worker.NewEmailDeliveryTask(user.Email, user.UserName, otp)
+	if err != nil {
+		http.Error(w, "Failed to create email task: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := h.client.Enqueue(task); err != nil {
+		http.Error(w, "Failed to enqueue email task: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	user.Password = ""
 	w.WriteHeader(http.StatusCreated)

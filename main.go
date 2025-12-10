@@ -1,15 +1,21 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/drumilbhati/teamsync/controllers"
 	"github.com/drumilbhati/teamsync/database"
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/store"
+	"github.com/drumilbhati/teamsync/worker"
 	"github.com/gorilla/mux"
+	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 )
 
@@ -34,6 +40,31 @@ func main() {
 		log.Fatal("Failed to connect ot redis", err)
 	}
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	redisOpt := asynq.RedisClientOpt{Addr: redisAddr}
+
+	// Create client for producers/controllers
+	client := asynq.NewClient(redisOpt)
+	defer client.Close()
+
+	// Create and start sever for consumer/worker
+	srv := asynq.NewServer(
+		redisOpt,
+		asynq.Config{
+			Concurrency: 10,
+		},
+	)
+
+	muxServer := asynq.NewServeMux()
+	muxServer.HandleFunc(worker.TypeEmailDelivery, worker.HandleEmailDeliveryTask)
+
+	// Run worker in background
+	go func() {
+		if err := srv.Run(muxServer); err != nil {
+			log.Fatalf("could not run server: %v", err)
+		}
+	}()
+
 	s := store.NewStore(db, rdb)
 
 	defer database.Close(db)
@@ -41,7 +72,7 @@ func main() {
 
 	r := mux.NewRouter()
 
-	u := controllers.NewUserHandler(s)
+	u := controllers.NewUserHandler(s, client)
 	t := controllers.NewTeamHandler(s)
 	m := controllers.NewMemberHandler(s)
 	k := controllers.NewTaskHandler(s)
@@ -93,14 +124,44 @@ func main() {
 	api.HandleFunc("/comment/{id}", c.UpdateCommentByID).Methods("PUT")
 	api.HandleFunc("/comment/{id}", c.DeleteCommentByID).Methods("DELETE")
 
-	//  --- Start Server ---
+	// --- Start Server ---
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		port = "8080"
 	}
 
-	log.Printf("Server starting on port: %s", port)
+	httpServer := &http.Server{
+		Addr:    ":" + port,
+		Handler: r,
+	}
 
-	log.Fatal(http.ListenAndServe(":"+port, r))
+	// Create a channel to listen for OS signals
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	// Run HTTP server in a goroutine
+	go func() {
+		log.Printf("Server starting on port: %s", port)
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("HTTP server error: %v", err)
+		}
+	}()
+
+	// Block until a signal is received
+	<-stop
+	log.Println("Shutting down server...")
+
+	// Create a context with a timeout for shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Shutdown HTTP server
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Printf("HTTP server shutdown error: %v", err)
+	}
+
+	// Shutdown Asynq worker
+	srv.Shutdown()
+
+	log.Println("Server gracefully stopped")
 }
