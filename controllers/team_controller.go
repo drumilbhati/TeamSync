@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/gorilla/mux"
@@ -62,16 +63,13 @@ func (h *TeamHandler) GetTeamsByTeamLeaderID(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *TeamHandler) GetTeamsByUserID(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-
-	user_id, err := strconv.Atoi(params["id"])
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	teams, err := h.store.GetTeamsByUserID(user_id)
+	teams, err := h.store.GetTeamsByUserID(requester_id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
@@ -110,6 +108,12 @@ func (h *TeamHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TeamHandler) UpdateTeamByID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 
 	team_id, err := strconv.Atoi(params["id"])
@@ -118,25 +122,53 @@ func (h *TeamHandler) UpdateTeamByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var team models.Team
-	json.NewDecoder(r.Body).Decode(&team)
+	var updated_team models.Team
+	json.NewDecoder(r.Body).Decode(&updated_team)
 
-	if err := h.store.UpdateTeamByID(team_id, &team); err != nil {
+	team, err := h.store.GetTeamByID(team_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if team.TeamLeaderID != requester_id {
+		http.Error(w, "Unauthorized: team leader can only update this team", http.StatusForbidden)
+		return
+	}
+
+	if err := h.store.UpdateTeamByID(team_id, &updated_team); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(&team)
+	json.NewEncoder(w).Encode(&updated_team)
 }
 
 func (h *TeamHandler) DeleteTeamByID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 
 	team_id, err := strconv.Atoi(params["id"])
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	team, err := h.store.GetTeamByID(team_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if team.TeamLeaderID != requester_id {
+		http.Error(w, "Unauthorized: team leader can only delete this team", http.StatusForbidden)
 		return
 	}
 
