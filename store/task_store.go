@@ -58,8 +58,8 @@ func (s *Store) GetTasksByTeamID(team_id int) ([]models.Task, error) {
 func (s *Store) UpdateTaskByID(task_id int, t *models.Task) error {
 	_, err := s.db.Exec(
 		`UPDATE tasks
-		SET assignee_id = $1, description = $2, status = $3, priority = $4, due_date = $5, updated_at = $6 WHERE task_id = $6`,
-		t.AssigneeID, t.Description, t.Status, t.Priority, t.DueDate, time.Now(), t.TaskID,
+		SET assignee_id = $1, description = $2, status = $3, priority = $4, due_date = $5, updated_at = $6 WHERE task_id = $7`,
+		t.AssigneeID, t.Description, t.Status, t.Priority, t.DueDate, time.Now(), task_id,
 	)
 
 	return err

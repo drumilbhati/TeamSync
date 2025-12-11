@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/gorilla/mux"
@@ -62,6 +63,11 @@ func (m *MemberHandler) GetMembersByTeamID(w http.ResponseWriter, r *http.Reques
 }
 
 func (m *MemberHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	var member models.Member
 
 	if err := json.NewDecoder(r.Body).Decode(&member); err != nil {
@@ -80,7 +86,7 @@ func (m *MemberHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = m.store.GetTeamByID(member.TeamID)
+	team, err := m.store.GetTeamByID(member.TeamID)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -88,6 +94,11 @@ func (m *MemberHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+		return
+	}
+
+	if team.TeamLeaderID != requester_id {
+		http.Error(w, "Unauthorized: only team leader can add members", http.StatusForbidden)
 		return
 	}
 
@@ -101,6 +112,11 @@ func (m *MemberHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m *MemberHandler) UpdateMemberByID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(r)
 
 	member_id, err := strconv.Atoi(params["id"])
@@ -117,6 +133,23 @@ func (m *MemberHandler) UpdateMemberByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	mem, err := m.store.GetMemberByID(member_id)
+	if err != nil {
+		http.Error(w, "Error getting member details", http.StatusInternalServerError)
+		return
+	}
+
+	team, err := m.store.GetTeamByID(mem.TeamID)
+	if err != nil {
+		http.Error(w, "Error getting team details", http.StatusInternalServerError)
+		return
+	}
+
+	if team.TeamLeaderID != requester_id {
+		http.Error(w, "Unauthorized: only the team leader can edit member details", http.StatusForbidden)
+		return
+	}
+
 	if err := m.store.UpdateMemberByID(member_id, &member); err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -127,12 +160,34 @@ func (m *MemberHandler) UpdateMemberByID(w http.ResponseWriter, r *http.Request)
 }
 
 func (m *MemberHandler) DeleteMemberByID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 	params := mux.Vars(r)
 
 	member_id, err := strconv.Atoi(params["id"])
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	mem, err := m.store.GetMemberByID(member_id)
+	if err != nil {
+		http.Error(w, "Error getting member details", http.StatusInternalServerError)
+		return
+	}
+
+	team, err := m.store.GetTeamByID(mem.TeamID)
+	if err != nil {
+		http.Error(w, "Error getting team details", http.StatusInternalServerError)
+		return
+	}
+
+	if team.TeamLeaderID != requester_id && mem.MemberID != requester_id {
+		http.Error(w, "Unauthorized: only the team leader can delete member details", http.StatusForbidden)
 		return
 	}
 

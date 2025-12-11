@@ -20,6 +20,12 @@ func NewCommentHandler(s *store.Store) *CommentHandler {
 }
 
 func (c *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var comment models.Comment
 
 	if err := json.NewDecoder(r.Body).Decode(&comment); err != nil {
@@ -27,9 +33,32 @@ func (c *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := c.store.GetTaskByTaskID(comment.TaskID)
+	if comment.UserID != requester_id {
+		http.Error(w, "Unauthorized: you can comment only for yourself", http.StatusForbidden)
+		return
+	}
+	
+	task, err := c.store.GetTaskByTaskID(comment.TaskID)
 	if err != nil {
 		http.Error(w, "No task for given id found", http.StatusNotFound)
+		return
+	}
+	
+	team, err := c.store.GetTeamByID(task.TeamID)
+	if err != nil {
+		http.Error(w, "No such team found", http.StatusNotFound)
+		return
+	}
+	
+	is_member_of_team := (team.TeamLeaderID == requester_id)
+	for _, m := range team.Members {
+		if m.UserID == requester_id {
+			is_member_of_team = true
+			break
+		}
+	}
+	if !is_member_of_team {
+		http.Error(w, "Unauthorized: only members of this team can comment on this task", http.StatusForbidden)
 		return
 	}
 
