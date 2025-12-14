@@ -72,7 +72,6 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 func (t *TaskHandler) GetTaskByTaskID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	task_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
 		return
@@ -89,24 +88,40 @@ func (t *TaskHandler) GetTaskByTaskID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(task)
 }
 
-func (t *TaskHandler) GetTasksByTeamID(w http.ResponseWriter, r *http.Request) {
+func (t *TaskHandler) GetTasksByTeamIDWithPriority(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	team_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
 		return
 	}
 
-	task, err := t.store.GetTasksByTeamID(team_id)
+	priority := r.URL.Query().Get("priority")
+	tasks, err := t.store.GetTaskByTeamIDWithPriority(team_id, models.TaskPriority(priority))
+	if err != nil {
+		http.Error(w, "No task found with given id", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tasks)
+}
 
+func (t *TaskHandler) GetTasksByTeamID(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	team_id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid request params", http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := t.store.GetTasksByTeamID(team_id)
 	if err != nil {
 		http.Error(w, "Not task found with given id", http.StatusNotFound)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(task)
+	json.NewEncoder(w).Encode(tasks)
 }
 
 func (t *TaskHandler) UpdateTaskByID(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +133,6 @@ func (t *TaskHandler) UpdateTaskByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	task_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
 		return
@@ -159,7 +173,6 @@ func (t *TaskHandler) DeleteTaskByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	task_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
 		return
