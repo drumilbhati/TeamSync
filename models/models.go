@@ -41,6 +41,14 @@ const (
 	TaskStatusDone       TaskStatus = "done"
 )
 
+func (ts TaskStatus) IsValid() bool {
+	switch ts {
+	case TaskStatusTodo, TaskStatusInProgress, TaskStatusInReview, TaskStatusDone:
+		return true
+	}
+	return false
+}
+
 type TaskPriority string
 
 const (
@@ -48,6 +56,14 @@ const (
 	TaskPriorityMedium TaskPriority = "medium"
 	TaskPriorityHigh   TaskPriority = "high"
 )
+
+func (tp TaskPriority) IsValid() bool {
+	switch tp {
+	case TaskPriorityLow, TaskPriorityMedium, TaskPriorityHigh:
+		return true
+	}
+	return false
+}
 
 type Task struct {
 	TaskID      int            `json:"task_id"`

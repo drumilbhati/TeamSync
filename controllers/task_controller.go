@@ -96,10 +96,41 @@ func (t *TaskHandler) GetTasksByTeamIDWithPriority(w http.ResponseWriter, r *htt
 		return
 	}
 
-	priority := r.URL.Query().Get("priority")
-	tasks, err := t.store.GetTaskByTeamIDWithPriority(team_id, models.TaskPriority(priority))
+	priorityStr := r.URL.Query().Get("priority")
+	priority := models.TaskPriority(priorityStr)
+	if !priority.IsValid() {
+		http.Error(w, "Invalid priority", http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := t.store.GetTasksByTeamIDWithPriority(team_id, models.TaskPriority(priority))
 	if err != nil {
-		http.Error(w, "No task found with given id", http.StatusNotFound)
+		http.Error(w, "No task found with given team_id and priority", http.StatusNotFound)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(tasks)
+}
+
+func (t *TaskHandler) GetTasksByTeamIDWithStatus(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	team_id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		http.Error(w, "Invalid request params", http.StatusBadRequest)
+		return
+	}
+
+	statusStr := r.URL.Query().Get("status")
+	status := models.TaskStatus(statusStr)
+
+	if !status.IsValid() {
+		http.Error(w, "Invalid status", http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := t.store.GetTaskByTeamIDWithStatus(team_id, models.TaskStatus(status))
+	if err != nil {
+		http.Error(w, "Error fetching tasks", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")

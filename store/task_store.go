@@ -49,10 +49,14 @@ func (s *Store) GetTasksByTeamID(team_id int) ([]models.Task, error) {
 		}
 		tasks = append(tasks, t)
 	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	return tasks, nil
 }
 
-func (s *Store) GetTaskByTeamIDWithPriority(team_id int, priority models.TaskPriority) ([]models.Task, error) {
+func (s *Store) GetTasksByTeamIDWithPriority(team_id int, priority models.TaskPriority) ([]models.Task, error) {
 	rows, err := s.db.Query(
 		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND priority = $2", team_id, priority,
 	)
@@ -60,6 +64,26 @@ func (s *Store) GetTaskByTeamIDWithPriority(team_id int, priority models.TaskPri
 		return nil, err
 	}
 
+	defer rows.Close()
+
+	var tasks []models.Task
+	for rows.Next() {
+		var t models.Task
+		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, t)
+	}
+	return tasks, nil
+}
+
+func (s *Store) GetTaskByTeamIDWithStatus(team_id int, status models.TaskStatus) ([]models.Task, error) {
+	rows, err := s.db.Query(
+		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND status = $2", team_id, status,
+	)
+	if err != nil {
+		return nil, err
+	}
 	defer rows.Close()
 
 	var tasks []models.Task

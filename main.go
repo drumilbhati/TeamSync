@@ -113,6 +113,7 @@ func main() {
 	api.HandleFunc("/task/{id}", k.GetTaskByTaskID).Methods("GET")
 	api.HandleFunc("/task", k.GetTasksByTeamID).Methods("GET").Queries("team_id", "{id}")
 	api.HandleFunc("/task", k.GetTasksByTeamIDWithPriority).Methods("GET").Queries("team_id", "{id}").Queries("priority", "{priority}")
+	api.HandleFunc("/task", k.GetTasksByTeamIDWithStatus).Methods("GET").Queries("team_id", "{id}").Queries("status", "{status}")
 	api.HandleFunc("/task", k.CreateTask).Methods("POST")
 	api.HandleFunc("/task/{id}", k.UpdateTaskByID).Methods("PUT")
 	api.HandleFunc("/task/{id}", k.DeleteTaskByID).Methods("DELETE")
