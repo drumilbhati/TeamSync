@@ -24,14 +24,12 @@ func (h *TeamHandler) GetTeamByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	team_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	team, err := h.store.GetTeamByID(team_id)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -45,14 +43,12 @@ func (h *TeamHandler) GetTeamsByTeamLeaderID(w http.ResponseWriter, r *http.Requ
 	params := mux.Vars(r)
 
 	team_leader_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	teams, err := h.store.GetTeamsByTeamLeaderID(team_leader_id)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -70,7 +66,6 @@ func (h *TeamHandler) GetTeamsByUserID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	teams, err := h.store.GetTeamsByUserID(requester_id)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -88,7 +83,6 @@ func (h *TeamHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, err := h.store.GetUserByID(team.TeamLeaderID)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid team_leader_id: user does not exit", http.StatusBadRequest)
@@ -155,7 +149,6 @@ func (h *TeamHandler) DeleteTeamByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	team_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -32,7 +32,6 @@ func (s *Store) GetUsers() ([]models.User, error) {
 	rows, err := s.db.Query(
 		"SELECT user_id, user_name, email, role, created_at, updated_at FROM users",
 	)
-
 	if err != nil {
 		return nil, err
 	}
@@ -41,48 +40,46 @@ func (s *Store) GetUsers() ([]models.User, error) {
 
 	var users []models.User
 	for rows.Next() {
-		var u models.User
-		if err := rows.Scan(&u.UserID, &u.UserName, &u.Email, &u.Role, &u.CreatedAt, &u.UpdatedAt); err != nil {
+		var user models.User
+		if err := rows.Scan(&user.UserID, &user.UserName, &user.Email, &user.Role, &user.CreatedAt, &user.UpdatedAt); err != nil {
 			return nil, err
 		}
-		u.Password = ""
-		users = append(users, u)
+		user.Password = ""
+		users = append(users, user)
 	}
 	return users, nil
 }
 
-func (s *Store) GetUserByID(id int) (*models.User, error) {
-	var u models.User
+func (s *Store) GetUserByID(userID int) (*models.User, error) {
+	var user models.User
 
 	err := s.db.QueryRow(
 		"SELECT user_id, user_name, email, role, created_at, updated_at FROM users WHERE user_id = $1",
-		id,
-	).Scan(&u.UserID, &u.UserName, &u.Email, &u.Role, &u.CreatedAt, &u.UpdatedAt)
-
+		userID,
+	).Scan(&user.UserID, &user.UserName, &user.Email, &user.Role, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
-	u.Password = ""
-	return &u, nil
+	user.Password = ""
+	return &user, nil
 }
 
 func (s *Store) GetUserByEmail(email string) (*models.User, error) {
-	var u models.User
+	var user models.User
 
 	err := s.db.QueryRow(
 		"SELECT user_id, user_name, email, password, role, created_at, updated_at, is_verified FROM users WHERE email = $1",
 		email,
-	).Scan(&u.UserID, &u.UserName, &u.Email, &u.Password, &u.Role, &u.CreatedAt, &u.UpdatedAt, &u.IsVerified)
-
+	).Scan(&user.UserID, &user.UserName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified)
 	if err != nil {
 		return nil, err
 	}
 
-	if !u.IsVerified {
+	if !user.IsVerified {
 		return nil, fmt.Errorf("user not verified")
 	}
 
-	return &u, nil
+	return &user, nil
 }
 
 func (s *Store) VerifyUser(userID int) error {
@@ -93,14 +90,13 @@ func (s *Store) VerifyUser(userID int) error {
 	return err
 }
 
-func (s *Store) CreateUser(u *models.User) error {
+func (s *Store) CreateUser(user *models.User) error {
 	err := s.db.QueryRow(
 		`INSERT INTO users (user_name, email, password, role)
 		VALUES ($1, $2, $3, $4)
 		RETURNING user_id, created_at`,
-		u.UserName, u.Email, u.Password, u.Role,
-	).Scan(&u.UserID, &u.CreatedAt)
-
+		user.UserName, user.Email, user.Password, user.Role,
+	).Scan(&user.UserID, &user.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -108,35 +104,34 @@ func (s *Store) CreateUser(u *models.User) error {
 	return nil
 }
 
-func (s *Store) UpdateUserByID(id int, u *models.User) error {
+func (s *Store) UpdateUserByID(userID int, user *models.User) error {
 	_, err := s.db.Exec(
 		`UPDATE users
 		SET user_name = $1, email = $2, password = $3, role = $4, updated_at = $5
 		WHERE user_id = $6`,
-		u.UserName, u.Email, u.Password, time.Now(), id,
+		user.UserName, user.Email, user.Password, time.Now(), userID,
 	)
 	return err
 }
 
-func (s *Store) DeleteUserByID(id int) error {
+func (s *Store) DeleteUserByID(userID int) error {
 	_, err := s.db.Exec(
-		"DELETE FROM users WHERE user_id = $1", id,
+		"DELETE FROM users WHERE user_id = $1", userID,
 	)
 	return err
 }
 
 func (s *Store) GetUserByEmailForAuth(email string) (*models.User, error) {
-	var u models.User
+	var user models.User
 	err := s.db.QueryRow(
 		"SELECT user_id, user_name, email, password, role, created_at, updated_at, is_verified FROM users WHERE email = $1",
 		email,
-	).Scan(&u.UserID, &u.UserName, &u.Email, &u.Password, &u.Role, &u.CreatedAt, &u.UpdatedAt, &u.IsVerified)
-
+	).Scan(&user.UserID, &user.UserName, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified)
 	if err != nil {
 		return nil, err
 	}
 
-	return &u, nil
+	return &user, nil
 }
 
 func GenerateOTP() string {

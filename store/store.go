@@ -15,6 +15,6 @@ type Store struct {
 func NewStore(db *sql.DB, rdb *redis.Client) *Store {
 	return &Store{
 		db:  db,
-		rdb: rdb,	
+		rdb: rdb,
 	}
 }

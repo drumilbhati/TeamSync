@@ -30,7 +30,6 @@ func NewUserHandler(s *store.Store, c *asynq.Client) *UserHandler {
 
 func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.store.GetUsers()
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -41,18 +40,15 @@ func (h *UserHandler) GetUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
-
 	params := mux.Vars(r)
 
 	id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	user, err := h.store.GetUserByID(id)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -84,7 +80,6 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -188,7 +183,6 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	// get user by email
 	user, err := h.store.GetUserByEmail(loginReq.Email)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
@@ -237,7 +231,6 @@ func (h *UserHandler) UpdateUserByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	user_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -271,7 +264,6 @@ func (h *UserHandler) DeleteUserByID(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 
 	user_id, err := strconv.Atoi(params["id"])
-
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

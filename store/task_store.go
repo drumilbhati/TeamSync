@@ -17,11 +17,11 @@ func (s *Store) CreateTask(t *models.Task) error {
 	return err
 }
 
-func (s *Store) GetTaskByTaskID(task_id int) (*models.Task, error) {
+func (s *Store) GetTaskByTaskID(taskID int) (*models.Task, error) {
 	var t models.Task
 	err := s.db.QueryRow(
 		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE task_id = $1",
-		task_id,
+		taskID,
 	).Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
 		return nil, err
@@ -30,10 +30,10 @@ func (s *Store) GetTaskByTaskID(task_id int) (*models.Task, error) {
 	return &t, nil
 }
 
-func (s *Store) GetTasksByTeamID(team_id int) ([]models.Task, error) {
+func (s *Store) GetTasksByTeamID(teamID int) ([]models.Task, error) {
 	rows, err := s.db.Query(
 		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1",
-		team_id,
+		teamID,
 	)
 	if err != nil {
 		return nil, err
@@ -56,9 +56,9 @@ func (s *Store) GetTasksByTeamID(team_id int) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func (s *Store) GetTasksByTeamIDWithPriority(team_id int, priority models.TaskPriority) ([]models.Task, error) {
+func (s *Store) GetTasksByTeamIDWithPriority(teamID int, priority models.TaskPriority) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND priority = $2", team_id, priority,
+		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND priority = $2", teamID, priority,
 	)
 	if err != nil {
 		return nil, err
@@ -77,9 +77,9 @@ func (s *Store) GetTasksByTeamIDWithPriority(team_id int, priority models.TaskPr
 	return tasks, nil
 }
 
-func (s *Store) GetTaskByTeamIDWithStatus(team_id int, status models.TaskStatus) ([]models.Task, error) {
+func (s *Store) GetTasksByTeamIDWithStatus(teamID int, status models.TaskStatus) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND status = $2", team_id, status,
+		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND status = $2", teamID, status,
 	)
 	if err != nil {
 		return nil, err
@@ -97,20 +97,20 @@ func (s *Store) GetTaskByTeamIDWithStatus(team_id int, status models.TaskStatus)
 	return tasks, nil
 }
 
-func (s *Store) UpdateTaskByID(task_id int, t *models.Task) error {
+func (s *Store) UpdateTaskByID(taskID int, t *models.Task) error {
 	_, err := s.db.Exec(
 		`UPDATE tasks
 		SET assignee_id = $1, description = $2, status = $3, priority = $4, due_date = $5, updated_at = $6 WHERE task_id = $7`,
-		t.AssigneeID, t.Description, t.Status, t.Priority, t.DueDate, time.Now(), task_id,
+		t.AssigneeID, t.Description, t.Status, t.Priority, t.DueDate, time.Now(), taskID,
 	)
 
 	return err
 }
 
-func (s *Store) DeleteTaskByID(task_id int) error {
+func (s *Store) DeleteTaskByID(taskID int) error {
 	_, err := s.db.Exec(
 		`DELETE FROM tasks WHERE task_id = $1`,
-		task_id,
+		taskID,
 	)
 	return err
 }

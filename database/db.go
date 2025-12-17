@@ -15,7 +15,6 @@ func Connect(host, port, user, password, dbname string) (*sql.DB, error) {
 	// sql.Open prepares a database connection
 	var err error
 	db, err := sql.Open("postgres", connStr)
-
 	if err != nil {
 		return nil, err
 	}

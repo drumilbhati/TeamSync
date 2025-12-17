@@ -128,7 +128,7 @@ func (t *TaskHandler) GetTasksByTeamIDWithStatus(w http.ResponseWriter, r *http.
 		return
 	}
 
-	tasks, err := t.store.GetTaskByTeamIDWithStatus(team_id, models.TaskStatus(status))
+	tasks, err := t.store.GetTasksByTeamIDWithStatus(team_id, models.TaskStatus(status))
 	if err != nil {
 		http.Error(w, "Error fetching tasks", http.StatusInternalServerError)
 		return
