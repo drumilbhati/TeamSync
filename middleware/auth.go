@@ -19,18 +19,25 @@ func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 1. Get the Authorization header
 		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Missing authorization header", http.StatusUnauthorized)
-			return
+		var tokenString string
+
+		if authHeader != "" {
+			// 2. Validate the header format (Bearer <token>)
+			headerParts := strings.Split(authHeader, " ")
+			if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+				http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+				return
+			}
+			tokenString = headerParts[1]
+		} else {
+			// Check query param (for WebSockets)
+			tokenString = r.URL.Query().Get("token")
 		}
 
-		// 2. Validate the header format (Bearer <token>)
-		headerParts := strings.Split(authHeader, " ")
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
+		if tokenString == "" {
+			http.Error(w, "Missing authorization token", http.StatusUnauthorized)
 			return
 		}
-		tokenString := headerParts[1]
 
 		// 3. Parse and validate the token
 		secret := os.Getenv("JWT_SECRET")

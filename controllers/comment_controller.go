@@ -37,19 +37,19 @@ func (c *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized: you can comment only for yourself", http.StatusForbidden)
 		return
 	}
-	
+
 	task, err := c.store.GetTaskByTaskID(comment.TaskID)
 	if err != nil {
 		http.Error(w, "No task for given id found", http.StatusNotFound)
 		return
 	}
-	
+
 	team, err := c.store.GetTeamByID(task.TeamID)
 	if err != nil {
 		http.Error(w, "No such team found", http.StatusNotFound)
 		return
 	}
-	
+
 	is_member_of_team := (team.TeamLeaderID == requester_id)
 	for _, m := range team.Members {
 		if m.UserID == requester_id {
@@ -121,7 +121,6 @@ func (c *CommentHandler) UpdateCommentByID(w http.ResponseWriter, r *http.Reques
 	}
 
 	comment, err := c.store.GetCommentbyID(comment_id)
-
 	if err != nil {
 		http.Error(w, "Comment with given id not found", http.StatusNotFound)
 		return
@@ -144,7 +143,6 @@ func (c *CommentHandler) UpdateCommentByID(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = c.store.UpdateCommentByID(comment_id, &updated_comment)
-
 	if err != nil {
 		http.Error(w, "Error updating comment", http.StatusInternalServerError)
 		return
@@ -171,7 +169,6 @@ func (c *CommentHandler) DeleteCommentByID(w http.ResponseWriter, r *http.Reques
 	}
 
 	comment, err := c.store.GetCommentbyID(comment_id)
-
 	if err != nil {
 		http.Error(w, "Comment with given id not found", http.StatusNotFound)
 		return
@@ -183,7 +180,6 @@ func (c *CommentHandler) DeleteCommentByID(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = c.store.DeleteCommentByID(comment_id)
-
 	if err != nil {
 		http.Error(w, "Error deleting comment", http.StatusInternalServerError)
 		return

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -14,10 +15,53 @@ import (
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/drumilbhati/teamsync/worker"
+	"github.com/drumilbhati/teamsync/ws"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
 )
+
+// Upgrader is used to upgrade HTTP connection to a websocket
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
+
+	if !ok {
+		fmt.Println("User not authenticated")
+		return
+	}
+
+	teams, err := s.GetTeamsByUserID(userID)
+	if err != nil {
+		fmt.Println("Error fetching teams")
+		return
+	}
+	var teamIDs []int
+	for _, team := range teams {
+		teamIDs = append(teamIDs, team.TeamID)
+	}
+
+	hub.AddUser(conn, teamIDs)
+
+	defer hub.RemoveUser(conn, teamIDs)
+
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			break
+		}
+	}
+}
 
 func main() {
 	godotenv.Load()
@@ -69,14 +113,16 @@ func main() {
 	defer database.CloseRedis(rdb)
 
 	r := mux.NewRouter()
+	wsHub := ws.NewHub()
 
 	u := controllers.NewUserHandler(s, client)
 	t := controllers.NewTeamHandler(s)
 	m := controllers.NewMemberHandler(s)
-	k := controllers.NewTaskHandler(s)
+	k := controllers.NewTaskHandler(s, wsHub)
 	c := controllers.NewCommentHandler(s)
 
 	// Define routes
+	// Websocket route
 
 	// --- Public Auth Routes (changed prefix to /auth) ---
 	r.HandleFunc("/auth/register", u.CreateUser).Methods("POST")
@@ -88,7 +134,12 @@ func main() {
 	api := r.PathPrefix("/api").Subrouter()
 	api.Use(middleware.AuthMiddleware)
 
-	// User routes (paths are now relative to /api)
+	// Websocket routes
+	api.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		wsHandler(wsHub, s, w, r)
+	})
+
+	// User routes
 	api.HandleFunc("/users", u.GetUsers).Methods("GET")
 	api.HandleFunc("/user/{id}", u.GetUserByID).Methods("GET")
 	api.HandleFunc("/user/{id}", u.UpdateUserByID).Methods("PUT")
@@ -132,7 +183,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Addr:    ":" + port,
-		Handler: r,
+		Handler: middleware.CORSMiddleware(r),
 	}
 
 	// Create a channel to listen for OS signals

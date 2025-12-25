@@ -9,15 +9,22 @@ import (
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
+	"github.com/drumilbhati/teamsync/ws"
 	"github.com/gorilla/mux"
 )
 
 type TaskHandler struct {
 	store *store.Store
+	wsHub *ws.Hub
 }
 
-func NewTaskHandler(s *store.Store) *TaskHandler {
-	return &TaskHandler{store: s}
+func NewTaskHandler(s *store.Store, wsHub *ws.Hub) *TaskHandler {
+	return &TaskHandler{store: s, wsHub: wsHub}
+}
+
+type Message struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
 }
 
 func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +71,14 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	msg := Message{
+		Type: "TASK_CREATED",
+		Data: task,
+	}
+	msgBytes, _ := json.Marshal(msg)
+
+	t.wsHub.BroadcastToTeam(task.TeamID, msgBytes)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
@@ -191,6 +206,17 @@ func (t *TaskHandler) UpdateTaskByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	updated_task.TeamID = task.TeamID
+
+	msg := Message{
+		Type: "TASK_UPDATED",
+		Data: updated_task,
+	}
+
+	msg_bytes, _ := json.Marshal(msg)
+
+	t.wsHub.BroadcastToTeam(updated_task.TeamID, msg_bytes)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(updated_task)
 }
@@ -224,6 +250,14 @@ func (t *TaskHandler) DeleteTaskByID(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error deleting the task", http.StatusInternalServerError)
 		return
 	}
+	msg := Message{
+		Type: "TASK_DELETED",
+		Data: map[string]int{"task_id": task_id},
+	}
+
+	msg_bytes, _ := json.Marshal(msg)
+
+	t.wsHub.BroadcastToTeam(task.TeamID, msg_bytes)
 
 	w.WriteHeader(http.StatusNoContent)
 }

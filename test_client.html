@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamSync WebSocket Test</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+        #log { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 1rem; background: #f9f9f9; margin-bottom: 1rem; }
+        .message { margin-bottom: 0.5rem; border-bottom: 1px solid #eee; padding-bottom: 0.25rem; }
+        .sent { color: #007bff; }
+        .received { color: #28a745; }
+        .error { color: #dc3545; }
+        input { padding: 0.5rem; width: 70%; }
+        button { padding: 0.5rem 1rem; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    <div id="status">Status: <span style="color: orange">Disconnected</span></div>
+    <div id="log"></div>
+    
+    <div style="display: flex; gap: 10px;">
+        <input type="text" id="msgInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Send</button>
+        <button onclick="connect()">Reconnect</button>
+    </div>
+
+    <script>
+        let socket;
+        const logDiv = document.getElementById('log');
+        const statusDiv = document.getElementById('status');
+        const input = document.getElementById('msgInput');
+
+        function connect() {
+            // Close existing connection if any
+            if (socket) {
+                socket.close();
+            }
+
+            // Create new WebSocket connection
+            // Assuming your server runs on localhost:8080
+            socket = new WebSocket("ws://localhost:8080/ws");
+
+            socket.onopen = function(e) {
+                statusDiv.innerHTML = 'Status: <span style="color: green; font-weight: bold;">Connected</span>';
+                log("System", "Connection established");
+            };
+
+            socket.onmessage = function(event) {
+                log("Received", event.data, "received");
+            };
+
+            socket.onclose = function(event) {
+                if (event.wasClean) {
+                    statusDiv.innerHTML = 'Status: <span style="color: orange">Closed cleanly</span>';
+                    log("System", `Connection closed code=${event.code} reason=${event.reason}`);
+                } else {
+                    statusDiv.innerHTML = 'Status: <span style="color: red; font-weight: bold;">Connection Died</span>'; // e.g. server process killed or network down
+                    log("System", "Connection died");
+                }
+            };
+
+            socket.onerror = function(error) {
+                log("Error", `[${error}]`, "error");
+            };
+        }
+
+        function sendMessage() {
+            const msg = input.value;
+            if (msg && socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(msg);
+                log("Sent", msg, "sent");
+                input.value = '';
+            } else {
+                alert("Not connected or empty message!");
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function log(type, msg, cssClass) {
+            const div = document.createElement('div');
+            div.className = `message ${cssClass || ''}`;
+            div.innerHTML = `<strong>${type}:</strong> ${msg}`;
+            logDiv.appendChild(div);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Auto-connect on load
+        connect();
+    </script>
+</body>
+</html>
