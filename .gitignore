@@ -3,3 +3,6 @@
 .gemini
 issues.txt
 teamsync
+*.log
+*.tmp
+node_modules/
