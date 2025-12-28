@@ -28,3 +28,7 @@
 {"level":"info","ts":1766899856.2710605,"caller":"worker/email.go:56","msg":"Email sent successfully to: drumil.b@ahduni.edu.in"}
 {"level":"info","ts":1766900029.2733877,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
 {"level":"info","ts":1766900029.7947948,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
+{"level":"info","ts":1766908871.7553034,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1766908871.7589478,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1766908873.5674958,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
+{"level":"info","ts":1766908874.758383,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
