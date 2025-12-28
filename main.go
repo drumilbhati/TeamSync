@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +10,7 @@ import (
 
 	"github.com/drumilbhati/teamsync/controllers"
 	"github.com/drumilbhati/teamsync/database"
+	"github.com/drumilbhati/teamsync/logs"
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/drumilbhati/teamsync/worker"
@@ -37,13 +36,13 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 	userID, ok := r.Context().Value(middleware.UserIDKey).(int)
 
 	if !ok {
-		fmt.Println("User not authenticated")
+		logs.Log.Info("User not authenticated")
 		return
 	}
 
 	teams, err := s.GetTeamsByUserID(userID)
 	if err != nil {
-		fmt.Println("Error fetching teams")
+		logs.Log.Error("Error fetching teams")
 		return
 	}
 	var teamIDs []int
@@ -64,6 +63,9 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 }
 
 func main() {
+	logs.InitLogger()
+	defer logs.Sync()
+
 	godotenv.Load()
 
 	db, err := database.Connect(
@@ -74,12 +76,12 @@ func main() {
 		os.Getenv("DB_NAME"),
 	)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		logs.Log.Fatal("Failed to connect to database: ", err)
 	}
 
 	rdb, err := database.ConnectRedis()
 	if err != nil {
-		log.Fatal("Failed to connect ot redis", err)
+		logs.Log.Fatal("Failed to connect to redis: ", err)
 	}
 
 	redisAddr := os.Getenv("REDIS_ADDR")
@@ -103,7 +105,7 @@ func main() {
 	// Run worker in background
 	go func() {
 		if err := srv.Run(muxServer); err != nil {
-			log.Fatalf("could not run server: %v", err)
+			logs.Log.Fatalf("could not run server: %v", err)
 		}
 	}()
 
@@ -141,39 +143,39 @@ func main() {
 
 	// User routes
 	api.HandleFunc("/users", u.GetUsers).Methods("GET")
-	api.HandleFunc("/user/{id}", u.GetUserByID).Methods("GET")
-	api.HandleFunc("/user/{id}", u.UpdateUserByID).Methods("PUT")
-	api.HandleFunc("/user/{id}", u.DeleteUserByID).Methods("DELETE")
+	api.HandleFunc("/users/{id}", u.GetUserByID).Methods("GET")
+	api.HandleFunc("/users/{id}", u.UpdateUserByID).Methods("PUT")
+	api.HandleFunc("/users/{id}", u.DeleteUserByID).Methods("DELETE")
 
 	// Team routes
-	api.HandleFunc("/team/{id}", t.GetTeamByID).Methods("GET")
-	api.HandleFunc("/team", t.GetTeamsByUserID).Methods("GET")
-	api.HandleFunc("/team", t.GetTeamsByTeamLeaderID).Methods("GET").Queries("team_leader_id", "{id}")
-	api.HandleFunc("/team", t.CreateTeam).Methods("POST")
-	api.HandleFunc("/team/{id}", t.UpdateTeamByID).Methods("PUT")
-	api.HandleFunc("/team/{id}", t.DeleteTeamByID).Methods("DELETE")
+	api.HandleFunc("/teams/{id}", t.GetTeamByID).Methods("GET")
+	api.HandleFunc("/teams", t.GetTeamsByUserID).Methods("GET")
+	api.HandleFunc("/teams", t.GetTeamsByTeamLeaderID).Methods("GET").Queries("team_leader_id", "{id}")
+	api.HandleFunc("/teams", t.CreateTeam).Methods("POST")
+	api.HandleFunc("/teams/{id}", t.UpdateTeamByID).Methods("PUT")
+	api.HandleFunc("/teams/{id}", t.DeleteTeamByID).Methods("DELETE")
 
 	// Member routes
-	api.HandleFunc("/member/{id}", m.GetMemberByID).Methods("GET")
-	api.HandleFunc("/member", m.GetMembersByTeamID).Methods("GET").Queries("team_id", "{id}")
-	api.HandleFunc("/member", m.CreateMember).Methods("POST")
-	api.HandleFunc("/member/{id}", m.UpdateMemberByID).Methods("PUT")
-	api.HandleFunc("/member/{id}", m.DeleteMemberByID).Methods("DELETE")
+	api.HandleFunc("/members/{id}", m.GetMemberByID).Methods("GET")
+	api.HandleFunc("/members", m.GetMembersByTeamID).Methods("GET").Queries("team_id", "{id}")
+	api.HandleFunc("/members", m.CreateMember).Methods("POST")
+	api.HandleFunc("/members/{id}", m.UpdateMemberByID).Methods("PUT")
+	api.HandleFunc("/members/{id}", m.DeleteMemberByID).Methods("DELETE")
 
 	// Task routes
-	api.HandleFunc("/task/{id}", k.GetTaskByTaskID).Methods("GET")
-	api.HandleFunc("/task", k.GetTasksByTeamID).Methods("GET").Queries("team_id", "{id}")
-	api.HandleFunc("/task", k.GetTasksByTeamIDWithPriority).Methods("GET").Queries("team_id", "{id}").Queries("priority", "{priority}")
-	api.HandleFunc("/task", k.GetTasksByTeamIDWithStatus).Methods("GET").Queries("team_id", "{id}").Queries("status", "{status}")
-	api.HandleFunc("/task", k.CreateTask).Methods("POST")
-	api.HandleFunc("/task/{id}", k.UpdateTaskByID).Methods("PUT")
-	api.HandleFunc("/task/{id}", k.DeleteTaskByID).Methods("DELETE")
+	api.HandleFunc("/tasks/{id}", k.GetTaskByTaskID).Methods("GET")
+	api.HandleFunc("/tasks", k.GetTasksByTeamID).Methods("GET").Queries("team_id", "{id}")
+	api.HandleFunc("/tasks", k.GetTasksByTeamIDWithPriority).Methods("GET").Queries("team_id", "{id}").Queries("priority", "{priority}")
+	api.HandleFunc("/tasks", k.GetTasksByTeamIDWithStatus).Methods("GET").Queries("team_id", "{id}").Queries("status", "{status}")
+	api.HandleFunc("/tasks", k.CreateTask).Methods("POST")
+	api.HandleFunc("/tasks/{id}", k.UpdateTaskByID).Methods("PUT")
+	api.HandleFunc("/tasks/{id}", k.DeleteTaskByID).Methods("DELETE")
 
 	// Comment routes
-	api.HandleFunc("/comment", c.CreateComment).Methods("POST")
-	api.HandleFunc("/comment/{task_id}", c.GetCommentsByTaskID).Methods("GET")
-	api.HandleFunc("/comment/{id}", c.UpdateCommentByID).Methods("PUT")
-	api.HandleFunc("/comment/{id}", c.DeleteCommentByID).Methods("DELETE")
+	api.HandleFunc("/comments", c.CreateComment).Methods("POST")
+	api.HandleFunc("/comments/{task_id}", c.GetCommentsByTaskID).Methods("GET")
+	api.HandleFunc("/comments/{id}", c.UpdateCommentByID).Methods("PUT")
+	api.HandleFunc("/comments/{id}", c.DeleteCommentByID).Methods("DELETE")
 
 	// --- Start Server ---
 	port := os.Getenv("PORT")
@@ -192,15 +194,15 @@ func main() {
 
 	// Run HTTP server in a goroutine
 	go func() {
-		log.Printf("Server starting on port: %s", port)
+		logs.Log.Infof("Server starting on port: %s", port)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("HTTP server error: %v", err)
+			logs.Log.Fatalf("HTTP server error: %v", err)
 		}
 	}()
 
 	// Block until a signal is received
 	<-stop
-	log.Println("Shutting down server...")
+	logs.Log.Info("Shutting down server...")
 
 	// Create a context with a timeout for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -208,11 +210,11 @@ func main() {
 
 	// Shutdown HTTP server
 	if err := httpServer.Shutdown(ctx); err != nil {
-		log.Printf("HTTP server shutdown error: %v", err)
+		logs.Log.Errorf("HTTP server shutdown error: %v", err)
 	}
 
 	// Shutdown Asynq worker
 	srv.Shutdown()
 
-	log.Println("Server gracefully stopped")
+	logs.Log.Info("Server gracefully stopped")
 }

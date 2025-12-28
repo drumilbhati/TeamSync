@@ -3,12 +3,12 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
 
+	"github.com/drumilbhati/teamsync/logs"
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
@@ -161,7 +161,7 @@ func (h *UserHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 
 	// delete the OTP from redis
 	if err := h.store.DeleteOTP(user.UserID); err != nil {
-		log.Printf("Warning: Failed to delete OTP for user %d: %s", user.UserID, err)
+		logs.Log.Warnf("Failed to delete OTP for user %d: %s", user.UserID, err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -185,7 +185,7 @@ func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	user, err := h.store.GetUserByEmail(loginReq.Email)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+			http.Error(w, "Invalid email", http.StatusUnauthorized)
 		} else if err.Error() == "user not verified" {
 			http.Error(w, "Account not verified. Please check your email.", http.StatusUnauthorized)
 		} else {

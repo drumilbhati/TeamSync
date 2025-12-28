@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
+	"github.com/drumilbhati/teamsync/logs"
 	"github.com/drumilbhati/teamsync/middleware"
 	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
@@ -98,7 +98,7 @@ func (t *TaskHandler) GetTaskByTaskID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Task ID: ", task.TaskID)
+	logs.Log.Info("Task ID: ", task.TaskID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
 }

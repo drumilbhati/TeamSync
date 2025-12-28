@@ -3,38 +3,35 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"net/smtp"
 	"os"
 	"strconv"
-
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
 func SendOTP(userEmail, userName, otp string) error {
-	fromEmail := os.Getenv("SENDGRID_FROM_EMAIL")
-	if fromEmail == "" {
-		return fmt.Errorf("SENDGRID_FROM_EMAIL not set in .env")
-	}
+	from := os.Getenv("FROM_MAIL")
 
-	from := mail.NewEmail("TeamSync", fromEmail)
+	password := os.Getenv("PASS_MAIL")
 
-	to := mail.NewEmail(userName, userEmail)
+	to := []string{userEmail}
 
-	plainTextContent := fmt.Sprintf("Hi %s, your verification code for TeamSync is: %v\n This code will expire in 10 minutes", userName, otp)
-	htmlContent := fmt.Sprintf("<strong>Hi %s,</strong><br><p>Your verification code for TeamSync is:</p><h1>%s</h1><p>This code will expire in 10 minutes.</p>", userName, otp)
+	host := "smtp.gmail.com"
 
-	message := mail.NewSingleEmail(from, "Your TeamSync Verification Code", to, plainTextContent, htmlContent)
+	port := "587"
 
-	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
+	subject := "Subject: Your TeamSync Verification Code\n"
 
-	response, err := client.Send(message)
+	mime := "MIME-version:1.0;\nContent-Type: text/plain;charset=\"UTF-8\";\n\n"
 
+	body := fmt.Sprintf("Hi %s, \n\nYour verification code is: %s,\n\nThis is valid for 10 minutes.", userName, otp)
+
+	msg := []byte(subject + mime + body)
+
+	auth := smtp.PlainAuth("", from, password, host)
+
+	err := smtp.SendMail(host+":"+port, auth, from, to, msg)
 	if err != nil {
-		return fmt.Errorf("failed to send email: %w", err)
-	}
-
-	if response.StatusCode != 202 {
-		return fmt.Errorf("sendgrid api returned non-success status: %d. Body: %s", response.StatusCode, response.Body)
+		return fmt.Errorf("failed to send emai: %w", err)
 	}
 
 	return nil

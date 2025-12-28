@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
+	"github.com/drumilbhati/teamsync/logs"
 	"github.com/drumilbhati/teamsync/utils"
 	"github.com/hibiken/asynq"
 )
@@ -47,12 +47,12 @@ func HandleEmailDeliveryTask(ctx context.Context, t *asynq.Task) error {
 		return fmt.Errorf("json.Unmarshal failed%v: %w", err, asynq.SkipRetry)
 	}
 
-	log.Printf("Sending email to User: %s", p.UserEmail)
+	logs.Log.Infof("Sending email to User: %s", p.UserEmail)
 
 	err := utils.SendOTP(p.UserEmail, p.UserEmail, p.OTP)
 	if err != nil {
 		return fmt.Errorf("failed to send email: %w", err)
 	}
-	log.Printf("Email sent successfully to: %s", p.UserEmail)
+	logs.Log.Infof("Email sent successfully to: %s", p.UserEmail)
 	return nil
 }

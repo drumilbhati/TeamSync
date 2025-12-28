@@ -3,7 +3,8 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
+
+	"github.com/drumilbhati/teamsync/logs"
 
 	_ "github.com/lib/pq"
 )
@@ -27,7 +28,7 @@ func Connect(host, port, user, password, dbname string) (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Println("Successfully connected to database!")
+	logs.Log.Info("Successfully connected to database!")
 
 	return db, nil
 }
