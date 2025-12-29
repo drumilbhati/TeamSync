@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const NavBar = () => {
   return (
-    <nav className="font-mono text-amber-50 text-4xl flex  items-center p-4 m-4 gap-8">
+    <nav className="font-mono text-amber-50 text-2xl flex justify-center">
       <div>
         <NavLink to="/">TeamSync</NavLink>
       </div>
