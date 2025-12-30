@@ -1,38 +1,10 @@
-{"level":"info","ts":1766710114.6629453,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766710114.6674464,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766710124.4607284,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766710124.7913902,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766899303.3090024,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766899303.31322,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766899426.1442544,"caller":"worker/email.go:50","msg":"Sending email to User: drumilbhati@gmail.com"}
-{"level":"info","ts":1766899430.3562505,"caller":"worker/email.go:56","msg":"Email sent successfully to: drumilbhati@gmail.com"}
-{"level":"info","ts":1766899666.43045,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766899666.469532,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766899670.842797,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766899670.846543,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766899685.3700497,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766899685.412857,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766899688.5617843,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766899688.5654876,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766899689.2181191,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766899689.4938984,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766899692.5362005,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766899692.5396116,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766899700.5738764,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766899700.8279371,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766899786.3277261,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766899786.3322716,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766899790.4596364,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@adhuni.edu.in"}
-{"level":"info","ts":1766899794.6529999,"caller":"worker/email.go:56","msg":"Email sent successfully to: drumil.b@adhuni.edu.in"}
-{"level":"info","ts":1766899852.3205743,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@ahduni.edu.in"}
-{"level":"info","ts":1766899856.2710605,"caller":"worker/email.go:56","msg":"Email sent successfully to: drumil.b@ahduni.edu.in"}
-{"level":"info","ts":1766900029.2733877,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766900029.7947948,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766908871.7553034,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766908871.7589478,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766908873.5674958,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766908874.758383,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
-{"level":"info","ts":1766979242.5204642,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
-{"level":"info","ts":1766979242.5273845,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
-{"level":"info","ts":1766980639.8222728,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
-{"level":"info","ts":1766980639.9648387,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
+{"level":"info","ts":1767081351.521652,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767081351.5265868,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767081571.6848779,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767081571.6876452,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767081574.1716838,"caller":"TeamSync/main.go:205","msg":"Shutting down server..."}
+{"level":"info","ts":1767081574.9278967,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
+{"level":"info","ts":1767083856.8796728,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767083856.8828957,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767091517.7742543,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767091517.78174,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}

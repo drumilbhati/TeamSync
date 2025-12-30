@@ -9,13 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   {
     /*const [error, setError] = useState(null);*/
   }
-  const [token, setToken] = useState("");
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -36,11 +39,10 @@ const Login = () => {
       }
 
       const data = await response.json();
-      setToken(data.token || data);
-      {
-        /*setError(null); */
-      }
-      console.log({ token });
+
+      login(data.token);
+
+      navigate("/");
     } catch (error) {
       console.log(error);
       {
