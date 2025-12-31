@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -76,21 +75,14 @@ func (h *TeamHandler) GetTeamsByUserID(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *TeamHandler) CreateTeam(w http.ResponseWriter, r *http.Request) {
+	requesterID := r.Context().Value(middleware.UserIDKey).(int)
 	var team models.Team
 	if err := json.NewDecoder(r.Body).Decode(&team); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	_, err := h.store.GetUserByID(team.TeamLeaderID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "Invalid team_leader_id: user does not exit", http.StatusBadRequest)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-		return
-	}
+	team.TeamLeaderID = requesterID
 
 	if err := h.store.CreateTeam(&team); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
