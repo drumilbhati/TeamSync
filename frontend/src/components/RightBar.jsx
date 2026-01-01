@@ -1,7 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useTeam } from "@/context/TeamContext";
 import { useEffect, useState } from "react";
-import { Card, CardHeader } from "./ui/card";
+import { Card, CardDescription, CardHeader } from "./ui/card";
 
 const RightBar = () => {
   const { selectedTeam } = useTeam();
@@ -39,14 +39,25 @@ const RightBar = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      <Card key={selectedTeam.team_id}>
+        <div>
+          <CardHeader>
+            <h3 className="text-teal-950!">
+              Selected Team:{selectedTeam.team_name}
+            </h3>
+          </CardHeader>
+        </div>
+      </Card>
       {tasks && tasks.length > 0 ? (
         tasks.map((task) => (
           <Card key={task.task_id}>
             <div>
               <CardHeader>
                 <h3 className="text-teal-950!">{task.title}</h3>
-                <p className="text-teal-950!">{task.description?.String}</p>
               </CardHeader>
+              <CardDescription>
+                <p className="text-teal-950!">{task.description?.String}</p>
+              </CardDescription>
             </div>
           </Card>
         ))

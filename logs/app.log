@@ -32,3 +32,7 @@
 {"level":"info","ts":1767233166.993188,"caller":"TeamSync/main.go:219","msg":"Server gracefully stopped"}
 {"level":"info","ts":1767233170.0483878,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
 {"level":"info","ts":1767233170.0510352,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767246142.286526,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767246142.2914686,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767246700.1680748,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767246700.170793,"caller":"TeamSync/main.go:197","msg":"Server starting on port: 8080"}
