@@ -28,5 +28,10 @@ export default defineConfig({
         secure: false,
       },
     },
+    "/ws": {
+      target: "ws://localhost:8080/api/ws",
+      changeOrigin: true,
+      secure: false,
+    },
   },
 });

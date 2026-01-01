@@ -1,4 +1,5 @@
 import LeftBar from "@/components/LeftBar";
+import MidBar from "@/components/MidBar";
 import RightBar from "@/components/RightBar";
 
 const Home = () => {
@@ -8,7 +9,9 @@ const Home = () => {
         <div className="sm:col-span-3 rounded-lg bg-amber-500 shadow sm:block hidden">
           <LeftBar />
         </div>
-        <div className="sm:col-span-7 rounded-lg bg-blue-500 shadow sm:block"></div>
+        <div className="sm:col-span-7 rounded-lg bg-blue-500 shadow sm:block">
+          <MidBar />
+        </div>
         <div className="sm:col-span-2 rounded-lg bg-purple-500 shadow sm:block hidden">
           <RightBar></RightBar>
         </div>

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"os/signal"
@@ -54,10 +55,34 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 
 	defer hub.RemoveUser(conn, teamIDs)
 
+	type Message struct {
+		TeamID  int    `json:"team_id"`
+		Content string `json:"content"`
+	}
+
 	for {
-		_, _, err := conn.ReadMessage()
+		_, message, err := conn.ReadMessage()
 		if err != nil {
 			break
+		}
+
+		var msg Message
+		if err := json.Unmarshal(message, &msg); err != nil {
+			logs.Log.Errorf("Error unmarshalling message: %v", err)
+			continue
+		}
+
+		// Verify the user is actually part of the team they are trying to message
+		isMember := false
+		for _, tid := range teamIDs {
+			if tid == msg.TeamID {
+				isMember = true
+				break
+			}
+		}
+
+		if isMember {
+			hub.BroadcastToTeam(msg.TeamID, message)
 		}
 	}
 }
@@ -124,8 +149,6 @@ func main() {
 	c := controllers.NewCommentHandler(s)
 
 	// Define routes
-	// Websocket route
-
 	// --- Public Auth Routes (changed prefix to /auth) ---
 	r.HandleFunc("/auth/register", u.CreateUser).Methods("POST")
 	r.HandleFunc("/auth/login", u.Login).Methods("POST")
