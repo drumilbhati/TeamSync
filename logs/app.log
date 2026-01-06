@@ -57,3 +57,24 @@
 {"level":"info","ts":1767315750.55843,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
 {"level":"info","ts":1767330073.6453974,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
 {"level":"info","ts":1767330073.649522,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767691982.2982929,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767691982.303736,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767692466.893471,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692512.748139,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692542.687718,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692557.9792042,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692583.384851,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692618.06044,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692637.778652,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692654.2047591,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1767692655.351392,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1767692661.4920352,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767692661.497652,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767692667.2450292,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692670.244211,"caller":"worker/email.go:57","msg":"Email sent successfully to: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692702.4010282,"caller":"worker/email.go:50","msg":"Sending email to User: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692705.393846,"caller":"worker/email.go:57","msg":"Email sent successfully to: drumil.b@ahduni.edu.in"}
+{"level":"info","ts":1767692734.0384,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692736.978793,"caller":"worker/email.go:57","msg":"Email sent successfully to: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692772.815659,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
+{"level":"info","ts":1767692775.7571259,"caller":"worker/email.go:57","msg":"Email sent successfully to: devarsh.d2@ahduni.edu.in"}

@@ -51,6 +51,7 @@ func HandleEmailDeliveryTask(ctx context.Context, t *asynq.Task) error {
 
 	err := utils.SendOTP(p.UserEmail, p.UserEmail, p.OTP)
 	if err != nil {
+		logs.Log.Errorf("Failed to send email to %s: %v", p.UserEmail, err)
 		return fmt.Errorf("failed to send email: %w", err)
 	}
 	logs.Log.Infof("Email sent successfully to: %s", p.UserEmail)

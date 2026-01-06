@@ -10,8 +10,11 @@ import (
 
 func SendOTP(userEmail, userName, otp string) error {
 	from := os.Getenv("FROM_MAIL")
-
 	password := os.Getenv("PASS_MAIL")
+
+	if from == "" || password == "" || from == "your-email@gmail.com" {
+		return fmt.Errorf("email credentials are not set in .env file. Please configure FROM_MAIL and PASS_MAIL")
+	}
 
 	to := []string{userEmail}
 
@@ -31,7 +34,7 @@ func SendOTP(userEmail, userName, otp string) error {
 
 	err := smtp.SendMail(host+":"+port, auth, from, to, msg)
 	if err != nil {
-		return fmt.Errorf("failed to send emai: %w", err)
+		return fmt.Errorf("SMTP error: %w", err)
 	}
 
 	return nil
