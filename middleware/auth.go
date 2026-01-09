@@ -23,7 +23,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 
 		if authHeader != "" {
 			// 2. Validate the header format (Bearer <token>)
-			headerParts := strings.Split(authHeader, " ")
+			// Use strings.Fields to handle multiple spaces correctly
+			headerParts := strings.Fields(authHeader)
 			if len(headerParts) != 2 || headerParts[0] != "Bearer" {
 				http.Error(w, "Invalid authorization header format", http.StatusUnauthorized)
 				return
@@ -35,6 +36,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if tokenString == "" {
+			// Log the error for debugging
+			fmt.Printf("AuthMiddleware: Missing token. AuthHeader: %q\n", authHeader)
 			http.Error(w, "Missing authorization token", http.StatusUnauthorized)
 			return
 		}

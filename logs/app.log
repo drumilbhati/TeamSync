@@ -78,3 +78,13 @@
 {"level":"info","ts":1767692736.978793,"caller":"worker/email.go:57","msg":"Email sent successfully to: devarsh.d2@ahduni.edu.in"}
 {"level":"info","ts":1767692772.815659,"caller":"worker/email.go:50","msg":"Sending email to User: devarsh.d2@ahduni.edu.in"}
 {"level":"info","ts":1767692775.7571259,"caller":"worker/email.go:57","msg":"Email sent successfully to: devarsh.d2@ahduni.edu.in"}
+{"level":"fatal","ts":1767848570.5596092,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1767848588.2619362,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767848588.2644842,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"fatal","ts":1767925079.123669,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1767925093.8583858,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767925093.864044,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1767927063.2421079,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1767927063.3819032,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1767927069.98795,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767927069.9940999,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
