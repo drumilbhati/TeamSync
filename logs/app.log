@@ -88,3 +88,16 @@
 {"level":"info","ts":1767927063.3819032,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
 {"level":"info","ts":1767927069.98795,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
 {"level":"info","ts":1767927069.9940999,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"fatal","ts":1767933722.2586381,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1767933745.5744379,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767933745.576718,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"fatal","ts":1767947763.288102,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1767947783.5425012,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1767947783.548728,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"fatal","ts":1768131586.996612,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp 127.0.0.1:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1768131622.746432,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768131622.7519722,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768132883.031703,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768132883.3347251,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768132893.4336472,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768132893.438272,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}

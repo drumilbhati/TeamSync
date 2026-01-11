@@ -1,9 +1,12 @@
 import { useAuth } from "@/context/AuthContext";
 import { useTeam } from "@/context/TeamContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardDescription, CardHeader } from "./ui/card";
+import { Button } from "./ui/button";
+import CreateTaskForm from "./CreateTaskForm";
 
 const RightBar = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { selectedTeam } = useTeam();
   const [tasks, setTasks] = useState([]);
   const { user } = useAuth();
@@ -40,35 +43,36 @@ const RightBar = () => {
     low: "text-green-500!",
   };
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      if (!selectedTeam) return;
-      try {
-        const query = `team_id=${selectedTeam.team_id}`;
-        const response = await fetch(`/api/tasks?${query}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  const fetchTasks = useCallback(async () => {
+    if (!selectedTeam) return;
+    try {
+      const query = `team_id=${selectedTeam.team_id}`;
+      const response = await fetch(`/api/tasks?${query}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (response.ok) {
-          const data = await response.json();
-          const sortedData = (data || []).sort((a, b) => {
-            const priorityA = priorityOrder[a.priority] || 0;
-            const priorityB = priorityOrder[b.priority] || 0;
-            return priorityB - priorityA;
-          });
-          setTasks(sortedData);
-          console.table(sortedData);
-        }
-      } catch (error) {
-        console.log(error);
+      if (response.ok) {
+        const data = await response.json();
+        const sortedData = (data || []).sort((a, b) => {
+          const priorityA = priorityOrder[a.priority] || 0;
+          const priorityB = priorityOrder[b.priority] || 0;
+          return priorityB - priorityA;
+        });
+        setTasks(sortedData);
+        console.table(sortedData);
       }
-    };
-    fetchTasks();
+    } catch (error) {
+      console.log(error);
+    }
   }, [selectedTeam, token]);
+
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
   if (!selectedTeam) {
     return <div className="p-4">Please select a team</div>;
@@ -85,6 +89,24 @@ const RightBar = () => {
           </CardHeader>
         </div>
       </Card>
+
+      <Button
+        onClick={() => {
+          setIsModalOpen(true);
+        }}
+      >
+        Create new task
+      </Button>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <CreateTaskForm 
+            onClose={() => setIsModalOpen(false)} 
+            onTaskCreated={fetchTasks}
+          />
+        </div>
+      )}
+
       {tasks && tasks.length > 0 ? (
         tasks.map((task) => (
           <Card key={task.task_id} className="bg-purple-200">

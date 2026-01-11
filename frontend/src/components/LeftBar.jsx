@@ -7,7 +7,7 @@ import CreateTeamForm from "./CreateTeamForm";
 
 const LeftBar = () => {
   const [teams, setTeams] = useState([]);
-  const [isModelOpen, setIsModelOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useAuth();
   const { setSelectedTeam } = useTeam();
   const token = user?.token;
@@ -38,19 +38,12 @@ const LeftBar = () => {
 
   return (
     <div>
-      {isModelOpen ? (
+      {isModalOpen ? (
         <div>
-          <Button
-            variant="outline"
-            onClick={() => setIsModelOpen(false)}
-            className="mb-4"
-          >
-            Back
-          </Button>
           <CreateTeamForm
             onTeamCreated={() => {
               fetchTeams();
-              setIsModelOpen(false);
+              setIsModalOpen(false);
             }}
           />
         </div>
@@ -62,7 +55,7 @@ const LeftBar = () => {
           >
             <Button
               onClick={() => {
-                setIsModelOpen((prev) => !prev);
+                setIsModalOpen((prev) => !prev);
               }}
             >
               Create new team
@@ -77,6 +70,7 @@ const LeftBar = () => {
             onClick={() => {
               setSelectedTeam(team);
             }}
+            className="cursor-pointer"
           >
             <div>
               <CardHeader>

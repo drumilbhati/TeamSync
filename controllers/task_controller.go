@@ -39,6 +39,8 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	task.CreatorID = requester_id
+
 	if task.CreatorID != requester_id {
 		http.Error(w, "Unauthorized: You can use only your user_id to create task", http.StatusForbidden)
 		return

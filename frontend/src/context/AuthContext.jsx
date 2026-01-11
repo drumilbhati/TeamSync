@@ -1,4 +1,5 @@
 import { useState, createContext, useContext, useEffect } from "react";
+import { parseJwt } from "@/lib/utils";
 
 const AuthContext = createContext(null);
 
@@ -10,14 +11,16 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("token");
 
     if (token) {
-      setUser({ token });
+      const decoded = parseJwt(token);
+      setUser({ token, ...decoded });
     }
     setLoading(false);
   }, []);
 
-  const login = (token, userData) => {
+  const login = (token) => {
     localStorage.setItem("token", token);
-    setUser({ token, ...(userData || {}) });
+    const decoded = parseJwt(token);
+    setUser({ token, ...decoded });
   };
 
   const logout = () => {
