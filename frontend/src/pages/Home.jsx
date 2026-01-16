@@ -4,16 +4,16 @@ import RightBar from "@/components/RightBar";
 
 const Home = () => {
   return (
-    <div>
-      <div className="max-w-dvw font-mono grid gap-2 sm:grid-cols-12 min-h-dvh">
-        <div className="sm:col-span-3 rounded-lg bg-amber-500 shadow sm:block hidden">
+    <div className="bg-background min-h-screen w-full">
+      <div className="grid gap-4 p-4 sm:grid-cols-12 h-[calc(100vh-2rem)]">
+        <div className="sm:col-span-3 rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
           <LeftBar />
         </div>
-        <div className="sm:col-span-6 rounded-lg bg-blue-500 shadow sm:block">
+        <div className="sm:col-span-6 rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
           <MidBar />
         </div>
-        <div className="sm:col-span-3 rounded-lg bg-purple-500 shadow sm:block hidden">
-          <RightBar></RightBar>
+        <div className="sm:col-span-3 rounded-xl border bg-card shadow-sm overflow-hidden flex flex-col">
+          <RightBar />
         </div>
       </div>
     </div>

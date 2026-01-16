@@ -19,11 +19,10 @@ func (s *Store) CreateComment(c *models.Comment) error {
 
 func (s *Store) GetCommentsByTaskID(taskID int) ([]models.Comment, error) {
 	query := `
-		SELECT c.comment_id, c.task_id, c.user_id, u.user_name, c.content, c.created_at
-		FROM comments c
-		JOIN users u ON c.user_id = u.user_id
-		WHERE c.task_id = $1
-		ORDER BY c.created_at ASC`
+		SELECT comment_id, task_id, user_id, COALESCE(user_name, ''), content, created_at
+		FROM comments
+		WHERE task_id = $1
+		ORDER BY created_at ASC`
 
 	rows, err := s.db.Query(query, taskID)
 	if err != nil {
@@ -47,7 +46,7 @@ func (s *Store) GetCommentsByTaskID(taskID int) ([]models.Comment, error) {
 func (s *Store) GetCommentbyID(comment_id int) (models.Comment, error) {
 	var c models.Comment
 	err := s.db.QueryRow(
-		"SELECT comment_id, task_id, user_id, user_name, content, created_at FROM comments WHERE comment_id = $1",
+		"SELECT comment_id, task_id, user_id, COALESCE(user_name, ''), content, created_at FROM comments WHERE comment_id = $1",
 		comment_id,
 	).Scan(&c.CommentID, &c.TaskID, &c.UserID, &c.UserName, &c.Content, &c.CreatedAt)
 	return c, err

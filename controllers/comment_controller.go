@@ -62,11 +62,13 @@ func (c *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = c.store.GetUserByID(comment.UserID)
+	user, err := c.store.GetUserByID(comment.UserID)
 	if err != nil {
 		http.Error(w, "No user for given id found", http.StatusNotFound)
 		return
 	}
+
+	comment.UserName = user.UserName
 
 	err = c.store.CreateComment(&comment)
 	if err != nil {

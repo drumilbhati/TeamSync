@@ -105,3 +105,34 @@
 {"level":"fatal","ts":1768276013.8520188,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp 127.0.0.1:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
 {"level":"info","ts":1768276036.896019,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
 {"level":"info","ts":1768276036.900784,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"fatal","ts":1768529110.413502,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1768529120.9908469,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768529120.996632,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768530405.428588,"caller":"worker/email.go:50","msg":"Sending email to User: drumilbhati5@gmail.com"}
+{"level":"info","ts":1768530409.206937,"caller":"worker/email.go:57","msg":"Email sent successfully to: drumilbhati5@gmail.com"}
+{"level":"info","ts":1768531254.371681,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768531255.193305,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768531257.339437,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768531257.3445299,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768531405.401628,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768531405.917598,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768531411.545195,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768531411.551052,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768531678.886261,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768531679.474656,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768531685.0387578,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768531685.0442848,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768531803.206513,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768531803.602808,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768531808.510102,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768531808.5182898,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768531910.5619662,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768531910.749552,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768531913.831823,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768531913.836849,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768532173.012325,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768532173.3903098,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768532175.5789042,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768532175.583453,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768532195.07273,"caller":"worker/email.go:50","msg":"Sending email to User: drumilbhati5@gmail.com"}
+{"level":"info","ts":1768532200.219726,"caller":"worker/email.go:57","msg":"Email sent successfully to: drumilbhati5@gmail.com"}
