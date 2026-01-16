@@ -44,17 +44,8 @@ const Register = () => {
         throw new Error(errorData.message || "Registration failed");
       }
 
-      // Assuming register returns a token, or we redirect to login. 
-      // If it returns a token, we can login immediately.
-      const data = await response.json();
-      
-      if (data.token) {
-          login(data.token);
-          navigate("/");
-      } else {
-          // If no token, maybe just redirect to login
-          navigate("/login");
-      }
+      // Redirect to verify page with email
+      navigate(`/verify?email=${encodeURIComponent(formData.email)}`);
     } catch (error) {
       console.error(error);
       setError(error.message);
