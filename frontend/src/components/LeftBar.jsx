@@ -32,13 +32,20 @@ const LeftBar = () => {
 
         if (response.ok) {
             const data = await response.json();
-            setTeams(data || []);
+            const fetchedTeams = data || [];
+            setTeams(fetchedTeams);
+
+            // If selected team is no longer in the list (e.g. deleted), clear selection
+            if (selectedTeam && !fetchedTeams.find(t => t.team_id === selectedTeam.team_id)) {
+              setSelectedTeam(null);
+            }
         }
         } catch (error) {
         console.log(error);
         }
     };
     fetchTeams();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, isModalOpen, editingTeam]); // Refetch on modal close (after create or edit)
 
   return (

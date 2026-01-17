@@ -46,25 +46,13 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	team, err := t.store.GetTeamByID(task.TeamID)
+	isMember, err := t.store.IsTeamMember(requester_id, task.TeamID)
 	if err != nil {
-		http.Error(w, "Error getting team details", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	is_member_of_team := false
-	if team.TeamLeaderID == requester_id {
-		is_member_of_team = true
-	} else {
-		for _, m := range team.Members {
-			if m.UserID == requester_id {
-				is_member_of_team = true
-				break
-			}
-		}
-	}
-
-	if !is_member_of_team {
+	if !isMember {
 		http.Error(w, "Unauthorized: You must be a member of the team to create tasks", http.StatusForbidden)
 		return
 	}
@@ -87,6 +75,12 @@ func (t *TaskHandler) CreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (t *TaskHandler) GetTaskByTaskID(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 	task_id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -100,16 +94,44 @@ func (t *TaskHandler) GetTaskByTaskID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isMember, err := t.store.IsTeamMember(requesterID, task.TeamID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isMember {
+		http.Error(w, "Forbidden: you are not a member of the team this task belongs to", http.StatusForbidden)
+		return
+	}
+
 	logs.Log.Info("Task ID: ", task.TaskID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(task)
 }
 
 func (t *TaskHandler) GetTasksByTeamIDWithPriority(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 	team_id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
+		return
+	}
+
+	isMember, err := t.store.IsTeamMember(requesterID, team_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isMember {
+		http.Error(w, "Forbidden: you are not a member of this team", http.StatusForbidden)
 		return
 	}
 
@@ -130,10 +152,27 @@ func (t *TaskHandler) GetTasksByTeamIDWithPriority(w http.ResponseWriter, r *htt
 }
 
 func (t *TaskHandler) GetTasksByTeamIDWithStatus(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 	team_id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
+		return
+	}
+
+	isMember, err := t.store.IsTeamMember(requesterID, team_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isMember {
+		http.Error(w, "Forbidden: you are not a member of this team", http.StatusForbidden)
 		return
 	}
 
@@ -155,10 +194,27 @@ func (t *TaskHandler) GetTasksByTeamIDWithStatus(w http.ResponseWriter, r *http.
 }
 
 func (t *TaskHandler) GetTasksByTeamID(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 	team_id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		http.Error(w, "Invalid request params", http.StatusBadRequest)
+		return
+	}
+
+	isMember, err := t.store.IsTeamMember(requesterID, team_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isMember {
+		http.Error(w, "Forbidden: you are not a member of this team", http.StatusForbidden)
 		return
 	}
 

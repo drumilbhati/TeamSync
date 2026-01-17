@@ -44,20 +44,13 @@ func (c *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	team, err := c.store.GetTeamByID(task.TeamID)
+	isMember, err := c.store.IsTeamMember(requester_id, task.TeamID)
 	if err != nil {
-		http.Error(w, "No such team found", http.StatusNotFound)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	is_member_of_team := (team.TeamLeaderID == requester_id)
-	for _, m := range team.Members {
-		if m.UserID == requester_id {
-			is_member_of_team = true
-			break
-		}
-	}
-	if !is_member_of_team {
+	if !isMember {
 		http.Error(w, "Unauthorized: only members of this team can comment on this task", http.StatusForbidden)
 		return
 	}
@@ -82,6 +75,12 @@ func (c *CommentHandler) CreateComment(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CommentHandler) GetCommentsByTaskID(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 
 	taskId, err := strconv.Atoi(params["task_id"])
@@ -90,9 +89,20 @@ func (c *CommentHandler) GetCommentsByTaskID(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	_, err = c.store.GetTaskByTaskID(taskId)
+	task, err := c.store.GetTaskByTaskID(taskId)
 	if err != nil {
 		http.Error(w, "No task found for given task_id", http.StatusNotFound)
+		return
+	}
+
+	isMember, err := c.store.IsTeamMember(requester_id, task.TeamID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isMember {
+		http.Error(w, "Forbidden: you are not a member of the team this task belongs to", http.StatusForbidden)
 		return
 	}
 

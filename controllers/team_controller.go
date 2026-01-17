@@ -20,6 +20,12 @@ func NewTeamHandler(s *store.Store) *TeamHandler {
 }
 
 func (h *TeamHandler) GetTeamByID(w http.ResponseWriter, r *http.Request) {
+	requesterID, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	params := mux.Vars(r)
 
 	team_id, err := strconv.Atoi(params["id"])
@@ -31,6 +37,17 @@ func (h *TeamHandler) GetTeamByID(w http.ResponseWriter, r *http.Request) {
 	team, err := h.store.GetTeamByID(team_id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	isMember, err := h.store.IsTeamMember(requesterID, team_id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !isMember {
+		http.Error(w, "Forbidden: you are not a member of this team", http.StatusForbidden)
 		return
 	}
 

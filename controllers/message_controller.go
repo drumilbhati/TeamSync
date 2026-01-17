@@ -37,25 +37,10 @@ func (m *MessageHandler) GetMessagesByTeamID(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Verify membership
-	members, err := m.store.GetMembersByTeamID(teamID)
+	isMember, err := m.store.IsTeamMember(requester_id, teamID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	isMember := false
-	for _, member := range members {
-		if member.UserID == requester_id {
-			isMember = true
-			break
-		}
-	}
-	// Also check if leader (though typically leader is also a member, but let's be safe if logic differs)
-	if !isMember {
-		team, err := m.store.GetTeamByID(teamID)
-		if err == nil && team.TeamLeaderID == requester_id {
-			isMember = true
-		}
 	}
 
 	if !isMember {

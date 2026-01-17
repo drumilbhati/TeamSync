@@ -92,3 +92,20 @@ func (s *Store) DeleteMemberByID(member_id int) error {
 	)
 	return err
 }
+
+func (s *Store) IsTeamMember(userID int, teamID int) (bool, error) {
+	var exists bool
+	err := s.db.QueryRow(
+		`SELECT EXISTS(
+			SELECT 1 FROM members WHERE user_id = $1 AND team_id = $2
+		) OR EXISTS(
+			SELECT 1 FROM teams WHERE team_leader_id = $1 AND team_id = $2
+		)`,
+		userID, teamID,
+	).Scan(&exists)
+
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}

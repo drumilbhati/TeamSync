@@ -1,21 +1,25 @@
-import { useState, createContext, useContext, useEffect } from "react";
+import { useState, createContext, useContext } from "react";
 import { parseJwt } from "@/lib/utils";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      const decoded = parseJwt(token);
-      setUser({ token, ...decoded });
+  const [user, setUser] = useState(() => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        const decoded = parseJwt(token);
+        return { token, ...decoded };
+      }
+    } catch (e) {
+      console.error("Failed to restore session:", e);
+      localStorage.removeItem("token");
     }
-    setLoading(false);
-  }, []);
+    return null;
+  });
+  
+  // Loading is false because initialization is synchronous
+  const [loading] = useState(false);
 
   const login = (token) => {
     localStorage.setItem("token", token);

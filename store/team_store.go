@@ -122,14 +122,34 @@ func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
 Given a team create a team in teams table
 */
 func (s *Store) CreateTeam(t *models.Team) error {
-	err := s.db.QueryRow(
+	tx, err := s.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	err = tx.QueryRow(
 		`INSERT INTO teams (team_name, team_leader_id)
 		VALUES ($1, $2)
 		RETURNING team_id, created_at`,
 		t.TeamName, t.TeamLeaderID,
 	).Scan(&t.TeamID, &t.CreatedAt)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(
+		`INSERT INTO members (user_id, team_id, role)
+		VALUES ($1, $2, 'leader')`,
+		t.TeamLeaderID, t.TeamID,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
 
 /*
