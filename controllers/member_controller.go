@@ -68,25 +68,54 @@ func (m *MemberHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	var member models.Member
 
-	if err := json.NewDecoder(r.Body).Decode(&member); err != nil {
+	var req struct {
+		TeamID int    `json:"team_id"`
+		UserID int    `json:"user_id"`
+		Email  string `json:"email"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	_, err := m.store.GetUserByID(member.UserID)
+	var targetUserID int
 
-	if err != nil {
-		if err == sql.ErrNoRows {
-			http.Error(w, "No user with given user_id found", http.StatusBadRequest)
-		} else {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+	if req.Email != "" {
+		user, err := m.store.GetUserByEmail(req.Email)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "No user with given email found", http.StatusNotFound)
+			} else if err.Error() == "user not verified" {
+				http.Error(w, "User exists but is not verified", http.StatusBadRequest)
+			} else {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
 		}
+		targetUserID = user.UserID
+	} else if req.UserID != 0 {
+		targetUserID = req.UserID
+	} else {
+		http.Error(w, "Either user_id or email must be provided", http.StatusBadRequest)
 		return
 	}
 
-	team, err := m.store.GetTeamByID(member.TeamID)
+	// Verify target user exists (redundant if looked up by email, but safe for ID)
+	if req.Email == "" {
+		_, err := m.store.GetUserByID(targetUserID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				http.Error(w, "No user with given user_id found", http.StatusBadRequest)
+			} else {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+	}
+
+	team, err := m.store.GetTeamByID(req.TeamID)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -100,6 +129,12 @@ func (m *MemberHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
 	if team.TeamLeaderID != requester_id {
 		http.Error(w, "Unauthorized: only team leader can add members", http.StatusForbidden)
 		return
+	}
+
+	member := models.Member{
+		TeamID: req.TeamID,
+		UserID: targetUserID,
+		Role:   "member", // Default role
 	}
 
 	if err := m.store.CreateMember(&member); err != nil {

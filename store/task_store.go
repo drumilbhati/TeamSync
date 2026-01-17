@@ -19,20 +19,29 @@ func (s *Store) CreateTask(t *models.Task) error {
 
 func (s *Store) GetTaskByTaskID(taskID int) (*models.Task, error) {
 	var t models.Task
+	var assigneeName *string
 	err := s.db.QueryRow(
-		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE task_id = $1",
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		FROM tasks t
+		LEFT JOIN users u ON t.assignee_id = u.user_id
+		WHERE t.task_id = $1`,
 		taskID,
-	).Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt)
+	).Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &assigneeName, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt)
 	if err != nil {
 		return nil, err
 	}
-
+	if assigneeName != nil {
+		t.AssigneeName = *assigneeName
+	}
 	return &t, nil
 }
 
 func (s *Store) GetTasksByTeamID(teamID int) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1",
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		FROM tasks t
+		LEFT JOIN users u ON t.assignee_id = u.user_id
+		WHERE t.team_id = $1`,
 		teamID,
 	)
 	if err != nil {
@@ -44,8 +53,12 @@ func (s *Store) GetTasksByTeamID(teamID int) ([]models.Task, error) {
 	var tasks []models.Task
 	for rows.Next() {
 		var t models.Task
-		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		var assigneeName *string
+		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &assigneeName, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
+		}
+		if assigneeName != nil {
+			t.AssigneeName = *assigneeName
 		}
 		tasks = append(tasks, t)
 	}
@@ -58,7 +71,10 @@ func (s *Store) GetTasksByTeamID(teamID int) ([]models.Task, error) {
 
 func (s *Store) GetTasksByTeamIDWithPriority(teamID int, priority models.TaskPriority) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND priority = $2", teamID, priority,
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		FROM tasks t
+		LEFT JOIN users u ON t.assignee_id = u.user_id
+		WHERE t.team_id = $1 AND t.priority = $2`, teamID, priority,
 	)
 	if err != nil {
 		return nil, err
@@ -69,8 +85,12 @@ func (s *Store) GetTasksByTeamIDWithPriority(teamID int, priority models.TaskPri
 	var tasks []models.Task
 	for rows.Next() {
 		var t models.Task
-		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		var assigneeName *string
+		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &assigneeName, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
+		}
+		if assigneeName != nil {
+			t.AssigneeName = *assigneeName
 		}
 		tasks = append(tasks, t)
 	}
@@ -79,7 +99,10 @@ func (s *Store) GetTasksByTeamIDWithPriority(teamID int, priority models.TaskPri
 
 func (s *Store) GetTasksByTeamIDWithStatus(teamID int, status models.TaskStatus) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		"SELECT task_id, team_id, creator_id, assignee_id, title, description, status, priority, due_date, created_at, updated_at FROM tasks WHERE team_id = $1 AND status = $2", teamID, status,
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		FROM tasks t
+		LEFT JOIN users u ON t.assignee_id = u.user_id
+		WHERE t.team_id = $1 AND t.status = $2`, teamID, status,
 	)
 	if err != nil {
 		return nil, err
@@ -89,8 +112,12 @@ func (s *Store) GetTasksByTeamIDWithStatus(teamID int, status models.TaskStatus)
 	var tasks []models.Task
 	for rows.Next() {
 		var t models.Task
-		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
+		var assigneeName *string
+		if err := rows.Scan(&t.TaskID, &t.TeamID, &t.CreatorID, &t.AssigneeID, &assigneeName, &t.Title, &t.Description, &t.Status, &t.Priority, &t.DueDate, &t.CreatedAt, &t.UpdatedAt); err != nil {
 			return nil, err
+		}
+		if assigneeName != nil {
+			t.AssigneeName = *assigneeName
 		}
 		tasks = append(tasks, t)
 	}

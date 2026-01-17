@@ -22,13 +22,31 @@ const MidBar = () => {
   }, [messages]);
 
   useEffect(() => {
+    if (selectedTeam && token) {
+        setMessages([]); // Clear existing messages immediately on switch
+        const fetchHistory = async () => {
+             try {
+                 const res = await fetch(`/api/messages?team_id=${selectedTeam.team_id}`, {
+                     headers: { Authorization: `Bearer ${token}` }
+                 });
+                 if (res.ok) {
+                     const data = await res.json();
+                     setMessages(data || []);
+                 }
+             } catch (e) {
+                 console.error(e);
+             }
+        };
+        fetchHistory();
+    }
+  }, [selectedTeam, token]);
+
+  useEffect(() => {
     if (!token) return;
 
-    // Clear messages when connecting to a new team context (or just on change)
-    setMessages([]);
-
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const websocket = new WebSocket(
-      `ws://localhost:8080/api/ws?token=${token}`,
+      `${protocol}//${window.location.host}/api/ws?token=${token}`,
     );
     wsRef.current = websocket;
 
@@ -105,17 +123,24 @@ const MidBar = () => {
                         isMe ? "justify-end" : "justify-start"
                     )}
                 >
-                    <div
-                        className={cn(
-                            "max-w-[80%] rounded-2xl px-4 py-2 text-sm shadow-sm",
-                            isMe 
-                                ? "bg-primary text-primary-foreground rounded-br-none" 
-                                : isSystem 
-                                    ? "bg-muted text-muted-foreground text-xs mx-auto" 
-                                    : "bg-muted text-foreground rounded-bl-none"
+                    <div className={cn("flex flex-col max-w-[80%]", isMe ? "items-end" : "items-start")}>
+                        {!isMe && !isSystem && (
+                            <span className="text-[10px] text-muted-foreground mb-1 px-1">
+                                {message.user_name}
+                            </span>
                         )}
-                    >
-                        <p>{message.content}</p>
+                        <div
+                            className={cn(
+                                "rounded-2xl px-4 py-2 text-sm shadow-sm break-words",
+                                isMe 
+                                    ? "bg-primary text-primary-foreground rounded-br-none" 
+                                    : isSystem 
+                                        ? "bg-muted text-muted-foreground text-xs mx-auto" 
+                                        : "bg-muted text-foreground rounded-bl-none"
+                            )}
+                        >
+                            <p>{message.content}</p>
+                        </div>
                     </div>
                 </div>
             );

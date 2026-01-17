@@ -13,6 +13,7 @@ import (
 	"github.com/drumilbhati/teamsync/database"
 	"github.com/drumilbhati/teamsync/logs"
 	"github.com/drumilbhati/teamsync/middleware"
+	"github.com/drumilbhati/teamsync/models"
 	"github.com/drumilbhati/teamsync/store"
 	"github.com/drumilbhati/teamsync/worker"
 	"github.com/drumilbhati/teamsync/ws"
@@ -41,6 +42,12 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
+	user, err := s.GetUserByID(userID)
+	if err != nil {
+		logs.Log.Errorf("Error fetching user: %v", err)
+		return
+	}
+
 	teams, err := s.GetTeamsByUserID(userID)
 	if err != nil {
 		logs.Log.Error("Error fetching teams")
@@ -56,8 +63,10 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 	defer hub.RemoveUser(conn, teamIDs)
 
 	type Message struct {
-		TeamID  int    `json:"team_id"`
-		Content string `json:"content"`
+		TeamID   int    `json:"team_id"`
+		Content  string `json:"content"`
+		UserID   int    `json:"user_id"`
+		UserName string `json:"user_name"`
 	}
 
 	for {
@@ -82,7 +91,26 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 		}
 
 		if isMember {
-			hub.BroadcastToTeam(msg.TeamID, message)
+			msg.UserID = userID
+			msg.UserName = user.UserName
+
+			// Save to database
+			dbMsg := models.Message{
+				TeamID:   msg.TeamID,
+				UserID:   msg.UserID,
+				UserName: msg.UserName,
+				Content:  msg.Content,
+			}
+			if err := s.CreateMessage(&dbMsg); err != nil {
+				logs.Log.Errorf("Error saving message: %v", err)
+			}
+
+			updatedMessage, err := json.Marshal(msg)
+			if err != nil {
+				logs.Log.Errorf("Error marshalling message: %v", err)
+				continue
+			}
+			hub.BroadcastToTeam(msg.TeamID, updatedMessage)
 		}
 	}
 }
@@ -147,12 +175,17 @@ func main() {
 	m := controllers.NewMemberHandler(s)
 	k := controllers.NewTaskHandler(s, wsHub)
 	c := controllers.NewCommentHandler(s)
+	msgCtrl := controllers.NewMessageHandler(s)
 
 	// Define routes
 	// --- Public Auth Routes (changed prefix to /auth) ---
 	r.HandleFunc("/auth/register", u.CreateUser).Methods("POST")
 	r.HandleFunc("/auth/login", u.Login).Methods("POST")
 	r.HandleFunc("/auth/verify", u.VerifyEmail).Methods("POST")
+	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	}).Methods("GET")
 
 	// --- Protected API Routes ---
 	// Create a subrouter that uses auth middleware
@@ -199,6 +232,9 @@ func main() {
 	api.HandleFunc("/comments/{task_id}", c.GetCommentsByTaskID).Methods("GET")
 	api.HandleFunc("/comments/{id}", c.UpdateCommentByID).Methods("PUT")
 	api.HandleFunc("/comments/{id}", c.DeleteCommentByID).Methods("DELETE")
+
+	// Message routes
+	api.HandleFunc("/messages", msgCtrl.GetMessagesByTeamID).Methods("GET").Queries("team_id", "{id}")
 
 	// --- Start Server ---
 	port := os.Getenv("PORT")

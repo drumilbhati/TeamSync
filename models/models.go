@@ -22,14 +22,17 @@ type Member struct {
 	TeamID    int       `json:"team_id"`
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
+	UserName  string    `json:"user_name,omitempty"`
+	Email     string    `json:"email,omitempty"`
 }
 
 type Team struct {
-	TeamID       int       `json:"team_id"`
-	TeamName     string    `json:"team_name"`
-	TeamLeaderID int       `json:"team_leader_id"`
-	Members      []Member  `json:"members"`
-	CreatedAt    time.Time `json:"created_at"`
+	TeamID         int       `json:"team_id"`
+	TeamName       string    `json:"team_name"`
+	TeamLeaderID   int       `json:"team_leader_id"`
+	TeamLeaderName string    `json:"team_leader_name,omitempty"`
+	Members        []Member  `json:"members"`
+	CreatedAt      time.Time `json:"created_at"`
 }
 
 type TaskStatus string
@@ -66,17 +69,18 @@ func (tp TaskPriority) IsValid() bool {
 }
 
 type Task struct {
-	TaskID      int            `json:"task_id"`
-	TeamID      int            `json:"team_id"`
-	CreatorID   int            `json:"creator_id"`
-	AssigneeID  sql.NullInt64  `json:"assignee_id"`
-	Title       string         `json:"title"`
-	Description sql.NullString `json:"description"`
-	Status      TaskStatus     `json:"status"`
-	Priority    TaskPriority   `json:"priority"`
-	DueDate     sql.NullTime   `json:"due_date"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   sql.NullTime   `json:"updated_at"`
+	TaskID       int            `json:"task_id"`
+	TeamID       int            `json:"team_id"`
+	CreatorID    int            `json:"creator_id"`
+	AssigneeID   sql.NullInt64  `json:"assignee_id"`
+	AssigneeName string         `json:"assignee_name,omitempty"`
+	Title        string         `json:"title"`
+	Description  sql.NullString `json:"description"`
+	Status       TaskStatus     `json:"status"`
+	Priority     TaskPriority   `json:"priority"`
+	DueDate      sql.NullTime   `json:"due_date"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    sql.NullTime   `json:"updated_at"`
 }
 
 type Comment struct {
@@ -84,6 +88,15 @@ type Comment struct {
 	TaskID    int       `json:"task_id"`
 	UserID    int       `json:"user_id"`
 	UserName  string    `json:"user_name,omitempty"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type Message struct {
+	MessageID int       `json:"message_id"`
+	TeamID    int       `json:"team_id"`
+	UserID    int       `json:"user_id"`
+	UserName  string    `json:"user_name"`
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }

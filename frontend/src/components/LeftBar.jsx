@@ -107,7 +107,7 @@ const LeftBar = () => {
                   </div>
               </div>
               <CardDescription className="text-xs mt-1.5 truncate">
-                ID: {team.team_id} • Leader: {team.team_leader_id}
+                Leader: {team.team_leader_name || team.team_leader_id}
               </CardDescription>
             </CardHeader>
           </Card>

@@ -23,9 +23,12 @@ import (
 func (s *Store) GetMemberByID(member_id int) (*models.Member, error) {
 	var member models.Member
 	err := s.db.QueryRow(
-		"SELECT member_id, user_id, team_id, role FROM members WHERE member_id = $1",
+		`SELECT m.member_id, m.user_id, m.team_id, m.role, u.user_name, u.email 
+		FROM members m
+		JOIN users u ON m.user_id = u.user_id
+		WHERE m.member_id = $1`,
 		member_id,
-	).Scan(&member.MemberID, &member.UserID, &member.TeamID, &member.Role)
+	).Scan(&member.MemberID, &member.UserID, &member.TeamID, &member.Role, &member.UserName, &member.Email)
 
 	if err != nil {
 		return nil, err
@@ -37,7 +40,10 @@ func (s *Store) GetMemberByID(member_id int) (*models.Member, error) {
 func (s *Store) GetMembersByTeamID(team_id int) ([]models.Member, error) {
 	var members []models.Member
 	rows, err := s.db.Query(
-		"SELECT member_id, user_id, team_id, role FROM members WHERE team_id = $1",
+		`SELECT m.member_id, m.user_id, m.team_id, m.role, u.user_name, u.email 
+		FROM members m
+		JOIN users u ON m.user_id = u.user_id
+		WHERE m.team_id = $1`,
 		team_id,
 	)
 
@@ -49,7 +55,7 @@ func (s *Store) GetMembersByTeamID(team_id int) ([]models.Member, error) {
 
 	for rows.Next() {
 		var member models.Member
-		if err := rows.Scan(&member.MemberID, &member.UserID, &member.TeamID, &member.Role); err != nil {
+		if err := rows.Scan(&member.MemberID, &member.UserID, &member.TeamID, &member.Role, &member.UserName, &member.Email); err != nil {
 			return nil, err
 		}
 		members = append(members, member)

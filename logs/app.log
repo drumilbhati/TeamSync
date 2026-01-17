@@ -136,3 +136,39 @@
 {"level":"info","ts":1768532175.583453,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
 {"level":"info","ts":1768532195.07273,"caller":"worker/email.go:50","msg":"Sending email to User: drumilbhati5@gmail.com"}
 {"level":"info","ts":1768532200.219726,"caller":"worker/email.go:57","msg":"Email sent successfully to: drumilbhati5@gmail.com"}
+{"level":"fatal","ts":1768548322.979594,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1768548338.360755,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"fatal","ts":1768548340.4770691,"caller":"TeamSync/main.go:109","msg":"Failed to connect to redis: failed to connect to Redis: dial tcp [::1]:6379: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:109\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1768548353.0016901,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768548353.004591,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768566792.002337,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768566792.007414,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"fatal","ts":1768612115.2997298,"caller":"TeamSync/main.go:104","msg":"Failed to connect to database: dial tcp [::1]:5432: connect: connection refused","stacktrace":"main.main\n\t/Users/drumilbhati/Documents/TeamSync/main.go:104\nruntime.main\n\t/opt/homebrew/Cellar/go/1.25.5/libexec/src/runtime/proc.go:285"}
+{"level":"info","ts":1768612128.456039,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768612128.4593039,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768612491.163734,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768612492.113038,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768612496.541004,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768612496.5465019,"caller":"TeamSync/main.go:220","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768612734.120789,"caller":"TeamSync/main.go:228","msg":"Shutting down server..."}
+{"level":"info","ts":1768612734.295773,"caller":"TeamSync/main.go:242","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768612738.398149,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768612738.4035132,"caller":"TeamSync/main.go:236","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768613064.5503979,"caller":"TeamSync/main.go:244","msg":"Shutting down server..."}
+{"level":"info","ts":1768613065.506052,"caller":"TeamSync/main.go:258","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768613071.86215,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768613071.866667,"caller":"TeamSync/main.go:252","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768613465.079335,"caller":"TeamSync/main.go:260","msg":"Shutting down server..."}
+{"level":"info","ts":1768613465.221289,"caller":"TeamSync/main.go:274","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768613471.8020852,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768613471.806891,"caller":"TeamSync/main.go:252","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768613603.565562,"caller":"TeamSync/main.go:260","msg":"Shutting down server..."}
+{"level":"info","ts":1768613604.5035899,"caller":"TeamSync/main.go:274","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768613607.800673,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768613607.8064032,"caller":"TeamSync/main.go:252","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768613771.924968,"caller":"TeamSync/main.go:260","msg":"Shutting down server..."}
+{"level":"info","ts":1768613772.3518689,"caller":"TeamSync/main.go:274","msg":"Server gracefully stopped"}
+{"level":"info","ts":1768613777.219372,"caller":"database/db.go:31","msg":"Successfully connected to database!"}
+{"level":"info","ts":1768613777.224789,"caller":"TeamSync/main.go:252","msg":"Server starting on port: 8080"}
+{"level":"info","ts":1768615891.101883,"caller":"TeamSync/main.go:260","msg":"Shutting down server..."}
+{"level":"info","ts":1768615891.223368,"caller":"TeamSync/main.go:274","msg":"Server gracefully stopped"}

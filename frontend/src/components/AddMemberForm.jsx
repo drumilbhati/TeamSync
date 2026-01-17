@@ -23,7 +23,7 @@ const AddMemberForm = ({ team, onClose }) => {
     setSuccess(false);
 
     try {
-      const response = await fetch("/api/teams/members", {
+      const response = await fetch("/api/members", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

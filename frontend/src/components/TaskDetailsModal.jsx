@@ -70,15 +70,10 @@ const TaskDetailsModal = ({ task, onClose }) => {
 
             if (response.ok) {
                 const createdComment = await response.json();
-                // Ensure the created comment has the user name for immediate display
-                const commentWithUser = {
-                    ...createdComment,
-                    user_name: user.user_name || user.username // Fallback to context user name
-                };
                 
-                // Optimistically update or re-fetch
+                // Optimistically update
+                setComments(prev => [...prev, createdComment]);
                 setNewComment("");
-                fetchComments(); 
             }
         } catch (e) {
             console.error(e);
@@ -144,7 +139,7 @@ const TaskDetailsModal = ({ task, onClose }) => {
                                     <User className="w-4 h-4 text-secondary-foreground" />
                                 </div>
                                 <span className="text-sm font-medium">
-                                    {task.assigned_to ? `User ID: ${task.assigned_to}` : "Unassigned"}
+                                    {task.assignee_name || (task.assignee_id?.Valid ? `User ID: ${task.assignee_id.Int64}` : "Unassigned")}
                                 </span>
                             </div>
                          </div>

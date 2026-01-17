@@ -121,9 +121,9 @@ const RightBar = () => {
                       <CardTitle className="text-base font-medium leading-none">
                         {task.title}
                       </CardTitle>
-                      {task.assigned_to && (
+                      {(task.assignee_name || task.assignee_id?.Valid) && (
                           <p className="text-[10px] text-muted-foreground mt-1">
-                              Assigned to ID: {task.assigned_to}
+                              Assigned to: {task.assignee_name || `ID: ${task.assignee_id?.Int64}`}
                           </p>
                       )}
                   </div>

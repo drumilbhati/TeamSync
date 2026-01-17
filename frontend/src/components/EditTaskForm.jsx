@@ -22,7 +22,9 @@ const EditTaskForm = ({ task, onClose, onTaskUpdated }) => {
   const [description, setDescription] = useState(task.description?.String || "");
   const [status, setStatus] = useState(task.status);
   const [priority, setPriority] = useState(task.priority);
-  const [assignedTo, setAssignedTo] = useState(task.assigned_to || "");
+  const [assignedTo, setAssignedTo] = useState(
+    task.assignee_id?.Valid ? task.assignee_id.Int64 : ""
+  );
   const [loading, setLoading] = useState(false);
   const [members, setMembers] = useState([]);
 
@@ -32,7 +34,7 @@ const EditTaskForm = ({ task, onClose, onTaskUpdated }) => {
           if (!selectedTeam) return;
           try {
               // Assuming this endpoint exists based on the requirement
-              const response = await fetch(`/api/teams/members?team_id=${selectedTeam.team_id}`, {
+              const response = await fetch(`/api/members?team_id=${selectedTeam.team_id}`, {
                   headers: {
                       Authorization: `Bearer ${token}`
                   }
@@ -54,7 +56,7 @@ const EditTaskForm = ({ task, onClose, onTaskUpdated }) => {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/tasks", {
+      const response = await fetch(`/api/tasks/${task.task_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -67,7 +69,7 @@ const EditTaskForm = ({ task, onClose, onTaskUpdated }) => {
           status,
           priority,
           team_id: parseInt(selectedTeam.team_id),
-          assigned_to: assignedTo ? parseInt(assignedTo) : null
+          assignee_id: assignedTo ? { Int64: parseInt(assignedTo), Valid: true } : { Int64: 0, Valid: false }
         }),
       });
 
@@ -150,14 +152,14 @@ const EditTaskForm = ({ task, onClose, onTaskUpdated }) => {
             <Label htmlFor="assignedTo">Assign To</Label>
             <select
               id="assignedTo"
-              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
               value={assignedTo}
               onChange={(e) => setAssignedTo(e.target.value)}
             >
               <option value="" className="bg-popover text-popover-foreground">Unassigned</option>
               {members.map(member => (
                   <option key={member.user_id} value={member.user_id} className="bg-popover text-popover-foreground">
-                      {member.username || member.email}
+                      {member.email}
                   </option>
               ))}
             </select>
