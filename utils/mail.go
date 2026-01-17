@@ -32,11 +32,14 @@ func SendOTP(userEmail, userName, otp string) error {
 
 	auth := smtp.PlainAuth("", from, password, host)
 
+	fmt.Printf("Attempting to send email from %s to %s via %s:%s...\n", from, userEmail, host, port)
 	err := smtp.SendMail(host+":"+port, auth, from, to, msg)
 	if err != nil {
+		fmt.Printf("SMTP error occurred: %v\n", err)
 		return fmt.Errorf("SMTP error: %w", err)
 	}
 
+	fmt.Printf("SMTP call completed successfully for %s\n", userEmail)
 	return nil
 }
 
