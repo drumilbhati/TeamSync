@@ -81,6 +81,29 @@ The server will start (default port: `8080`).
 
 ---
 
+## Deployment (AWS & Docker)
+
+For production deployment, this project is optimized to run using **Docker Compose**.
+
+### Local Production Build
+```bash
+docker-compose up -d --build
+```
+
+### AWS EC2 Deployment
+For detailed AWS setup (Security Groups, Swap Space, and Nginx proxying), refer to the [AWS Deployment Guide](./AWS_DEPLOYMENT_GUIDE.md).
+
+Quick start on EC2 (Ubuntu 24.04):
+1. **Prepare Server:** Install Docker and Docker Compose.
+2. **Transfer Code:** Use `rsync` to upload the project.
+3. **Configure Environment:** Create a production `.env` file on the server.
+4. **Launch:**
+   ```bash
+   sudo docker-compose up -d --build
+   ```
+
+---
+
 ## API Endpoints
 
 ### Authentication
