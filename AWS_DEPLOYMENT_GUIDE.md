@@ -40,8 +40,8 @@ DB_PASSWORD=<random_generated>
 DB_NAME=teamsync
 REDIS_ADDR=redis:6379
 JWT_SECRET=<random_generated>
-FROM_MAIL=drumilbhati5@gmail.com
-PASS_MAIL=ynjk hckt jviy fggz
+FROM_MAIL=<email>
+PASS_MAIL=<password>
 PORT=8080
 ```
 
