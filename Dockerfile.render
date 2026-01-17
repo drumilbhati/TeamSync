@@ -1,0 +1,58 @@
+# Stage 1: Build Go Backend
+FROM golang:1.23-alpine AS backend-builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o backend .
+
+# Stage 2: Build React Frontend
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
+
+# Stage 3: Final Monolith Image
+FROM ubuntu:22.04
+
+# Avoid prompts from apt
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    postgresql-14 \
+    redis-server \
+    nginx \
+    supervisor \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set up workdir
+WORKDIR /app
+
+# Copy Backend
+COPY --from=backend-builder /app/backend /app/backend
+COPY database/schema.sql /app/database/schema.sql
+
+# Copy Frontend
+COPY --from=frontend-builder /app/dist /usr/share/nginx/html
+
+# Copy Configs
+COPY deployment/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY deployment/nginx.conf /etc/nginx/sites-available/default
+RUN ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+COPY deployment/entrypoint.sh /app/entrypoint.sh
+
+# Setup Permissions
+RUN chmod +x /app/entrypoint.sh && \
+    mkdir -p /var/lib/postgresql/data && \
+    chown -R postgres:postgres /var/lib/postgresql/data
+
+# Default Port for Render
+ENV PORT=80
+EXPOSE 80
+
+ENTRYPOINT ["/app/entrypoint.sh"]

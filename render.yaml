@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: teamsync-monolith
+    env: docker
+    dockerContext: .
+    dockerfilePath: Dockerfile.render
+    plan: free # Change to 'starter' or higher if you need persistence
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FROM_MAIL
+        sync: false
+      - key: PASS_MAIL
+        sync: false
+    # Note: Free plan on Render does not support persistent disks.
+    # If you upgrade to a paid plan, uncomment the lines below for persistence:
+    # disk:
+    #   name: pgdata
+    #   mountPath: /var/lib/postgresql/data
+    #   sizeGB: 1
