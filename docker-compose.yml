@@ -5,9 +5,10 @@ services:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
       POSTGRES_DB: ${DB_NAME:-teamsync}
+      PGDATA: /var/lib/postgresql/data
     volumes:
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      - ./postgres_data:/var/lib/postgresql/data
+      - /Users/drumilbhati/teamsync_db_rescue/data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:

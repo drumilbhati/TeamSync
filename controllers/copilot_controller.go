@@ -47,7 +47,11 @@ func Describe(w http.ResponseWriter, r *http.Request) {
 			
 			Give two fields in your response object:
 			1. The new and improved title for the task
-			2. The new and improve description for the task`,
+			2. The new and improve description for the task
+			Only give these two fields, no other text is expected from you, neither should you give.
+			The fields of output should be same as the fields of input, just modify them to be more descriptive.
+			Match the case with that of the input fields (everything in fieldname is lowercase.
+			Give a well formatted json object in return with all the five fields as given to you.`,
 		input.Title, input.Description.String, input.Status, input.Priority)
 
 	result, err := client.Models.GenerateContent(
