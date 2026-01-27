@@ -236,6 +236,8 @@ func main() {
 	// Message routes
 	api.HandleFunc("/messages", msgCtrl.GetMessagesByTeamID).Methods("GET").Queries("team_id", "{id}")
 
+	// Copilot route
+	api.HandleFunc("/enhance", controllers.Describe).Methods("POST")
 	// --- Start Server ---
 	port := os.Getenv("PORT")
 	if port == "" {

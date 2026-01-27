@@ -11,7 +11,8 @@ const NavBar = () => {
 
   return (
     <nav className="border-b border-border bg-background px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-      <div className="font-mono text-xl font-bold tracking-tighter">
+      <div className="flex items-center gap-2 font-mono text-xl font-bold tracking-tighter">
+        <img src="/logo.svg" alt="Logo" className="w-8 h-8" />
         <NavLink to="/" className="text-foreground hover:text-primary transition-colors">TeamSync</NavLink>
       </div>
       

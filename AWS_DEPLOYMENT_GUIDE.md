@@ -54,8 +54,14 @@ rsync -avz -e "ssh -i ~/Downloads/user.pem" \
   --exclude 'node_modules' \
   --exclude '.git' \
   --exclude 'frontend/node_modules' \
-  ./ ubuntu@13.53.168.118:~/teamsync/
+  ./ ubuntu@13.63.66.118:~/teamsync/
 ```
+
+### Domain Configuration
+- **Domain:** teamsynch.tech
+- **Elastic IP:** 13.63.66.118
+- **A Record:** Point `@` to `13.63.66.118`
+- **CNAME Record:** Point `www` to `teamsynch.tech`
 
 ### Starting the App (Run on EC2)
 ```bash
