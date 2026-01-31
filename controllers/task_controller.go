@@ -347,6 +347,12 @@ func (t *TaskHandler) EnhanceTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = t.store.UpdateTaskByID(task_id, enhanced_task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(enhanced_task)
 }

@@ -9,3 +9,12 @@ export const apiFetch = async (url, options = {}) => {
     headers,
   });
 };
+
+export const enhanceTask = async (taskId, token) => {
+    return apiFetch(`/api/tasks/enhance/${taskId}`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+};

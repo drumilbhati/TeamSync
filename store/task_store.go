@@ -21,7 +21,7 @@ func (s *Store) GetTaskByTaskID(taskID int) (*models.Task, error) {
 	var t models.Task
 	var assigneeName *string
 	err := s.db.QueryRow(
-		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at
 		FROM tasks t
 		LEFT JOIN users u ON t.assignee_id = u.user_id
 		WHERE t.task_id = $1`,
@@ -38,7 +38,7 @@ func (s *Store) GetTaskByTaskID(taskID int) (*models.Task, error) {
 
 func (s *Store) GetTasksByTeamID(teamID int) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at
 		FROM tasks t
 		LEFT JOIN users u ON t.assignee_id = u.user_id
 		WHERE t.team_id = $1`,
@@ -71,7 +71,7 @@ func (s *Store) GetTasksByTeamID(teamID int) ([]models.Task, error) {
 
 func (s *Store) GetTasksByTeamIDWithPriority(teamID int, priority models.TaskPriority) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at
 		FROM tasks t
 		LEFT JOIN users u ON t.assignee_id = u.user_id
 		WHERE t.team_id = $1 AND t.priority = $2`, teamID, priority,
@@ -99,7 +99,7 @@ func (s *Store) GetTasksByTeamIDWithPriority(teamID int, priority models.TaskPri
 
 func (s *Store) GetTasksByTeamIDWithStatus(teamID int, status models.TaskStatus) ([]models.Task, error) {
 	rows, err := s.db.Query(
-		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at 
+		`SELECT t.task_id, t.team_id, t.creator_id, t.assignee_id, u.user_name, t.title, t.description, t.status, t.priority, t.due_date, t.created_at, t.updated_at
 		FROM tasks t
 		LEFT JOIN users u ON t.assignee_id = u.user_id
 		WHERE t.team_id = $1 AND t.status = $2`, teamID, status,
@@ -127,8 +127,8 @@ func (s *Store) GetTasksByTeamIDWithStatus(teamID int, status models.TaskStatus)
 func (s *Store) UpdateTaskByID(taskID int, t *models.Task) error {
 	_, err := s.db.Exec(
 		`UPDATE tasks
-		SET assignee_id = $1, description = $2, status = $3, priority = $4, due_date = $5, updated_at = $6 WHERE task_id = $7`,
-		t.AssigneeID, t.Description, t.Status, t.Priority, t.DueDate, time.Now(), taskID,
+		SET title = $1, assignee_id = $2, description = $3, status = $4, priority = $5, due_date = $6, updated_at = $7 WHERE task_id = $8`,
+		t.Title, t.AssigneeID, t.Description, t.Status, t.Priority, t.DueDate, time.Now(), taskID,
 	)
 
 	return err

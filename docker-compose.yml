@@ -1,14 +1,13 @@
 services:
   db:
-    image: postgres:alpine
+    image: postgres:15
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
       POSTGRES_DB: ${DB_NAME:-teamsync}
-      PGDATA: /var/lib/postgresql/data
     volumes:
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
-      - /Users/drumilbhati/teamsync_db_rescue/data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
     healthcheck:
@@ -53,3 +52,6 @@ services:
       - "443:443"
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+
+volumes:
+  postgres_data:

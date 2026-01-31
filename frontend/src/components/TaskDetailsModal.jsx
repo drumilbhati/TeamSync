@@ -2,8 +2,9 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Card, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
-import { X, Send, User, Clock, Calendar } from "lucide-react";
+import { X, Send, User, Clock, Calendar, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { enhanceTask } from "@/lib/api";
 
 const statusMap = {
     todo: "To Do",
@@ -12,12 +13,14 @@ const statusMap = {
     done: "Done",
 };
 
-const TaskDetailsModal = ({ task, onClose }) => {
+const TaskDetailsModal = ({ task: initialTask, onClose }) => {
     const { user } = useAuth();
     const token = user?.token;
+    const [task, setTask] = useState(initialTask);
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState("");
     const [submitting, setSubmitting] = useState(false);
+    const [enhancing, setEnhancing] = useState(false);
     const commentsEndRef = useRef(null);
 
     // Fetch comments
@@ -82,6 +85,23 @@ const TaskDetailsModal = ({ task, onClose }) => {
         }
     };
 
+    const handleEnhance = async () => {
+        setEnhancing(true);
+        try {
+            const response = await enhanceTask(task.task_id, token);
+            if (response.ok) {
+                const enhancedTask = await response.json();
+                setTask(enhancedTask);
+            } else {
+                console.error("Failed to enhance task");
+            }
+        } catch (e) {
+            console.error("Error enhancing task:", e);
+        } finally {
+            setEnhancing(false);
+        }
+    }
+
     const getPriorityColor = (priority) => {
         switch(priority) {
             case 'high': return "text-red-500 bg-red-500/10 border-red-500/20";
@@ -93,16 +113,32 @@ const TaskDetailsModal = ({ task, onClose }) => {
 
     if (!task) return null;
 
+    const isCreator = user?.user_id === task.creator_id;
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
             <Card className="w-full max-w-4xl h-[85vh] flex flex-col shadow-2xl bg-card text-card-foreground border-border overflow-hidden">
                 <CardHeader className="flex flex-row items-start justify-between p-6 border-b shrink-0 bg-muted/5">
-                    <div className="space-y-1 pr-8">
-                         <div className="flex items-center gap-3">
-                            <CardTitle className="text-2xl font-bold tracking-tight">{task.title}</CardTitle>
-                            <span className={cn("text-[10px] uppercase font-bold px-2 py-0.5 rounded border", getPriorityColor(task.priority))}>
-                                {task.priority}
-                            </span>
+                    <div className="space-y-1 pr-8 flex-1">
+                         <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <CardTitle className="text-2xl font-bold tracking-tight">{task.title}</CardTitle>
+                                <span className={cn("text-[10px] uppercase font-bold px-2 py-0.5 rounded border", getPriorityColor(task.priority))}>
+                                    {task.priority}
+                                </span>
+                            </div>
+                            {isCreator && (
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="gap-2 text-xs h-8 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all duration-300 shadow-sm"
+                                    onClick={handleEnhance}
+                                    disabled={enhancing}
+                                >
+                                    {enhancing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                    {enhancing ? "Enhancing..." : "Enhance with AI"}
+                                </Button>
+                            )}
                          </div>
                          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
                              <div className="flex items-center gap-1">
@@ -117,7 +153,7 @@ const TaskDetailsModal = ({ task, onClose }) => {
                              )}
                          </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0 -mr-2 -mt-2">
+                    <Button variant="ghost" size="icon" onClick={onClose} className="shrink-0 -mr-2 -mt-2 ml-4">
                         <X className="w-5 h-5" />
                     </Button>
                 </CardHeader>
