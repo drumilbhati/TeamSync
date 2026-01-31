@@ -6,24 +6,19 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/drumilbhati/teamsync/models"
 	"google.golang.org/genai"
 )
 
-type TaskInput struct {
-	Title       string `json:"title"`
-	Description struct {
-		String string `json:"String"`
-		Valid  bool   `json:"Valid"`
-	} `json:"description"`
-	Status   string `json:"status"`
-	Priority string `json:"priority"`
-	TeamID   int    `json:"team_id"`
-	UserID   int    `json:"user_id"`
-}
-
 func Describe(w http.ResponseWriter, r *http.Request) {
-	var input TaskInput
+	var input models.Task
 	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	inputBytes, err := json.Marshal(input)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -36,23 +31,20 @@ func Describe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	prompt := fmt.Sprintf(`The data given to you is related to a task that is being generated on a task management platform. The data may be vague, incomplete and not useful to the team of the user. 
-			Give a detailed description for this task based on the given input data in order to make this more useful and descriptive. 
-			
-			Task Details:
-			Title: %s
-			Description: %s
-			Status: %s
-			Priority: %s
-			
-			Give two fields in your response object:
-			1. The new and improved title for the task
-			2. The new and improve description for the task
-			Only give these two fields, no other text is expected from you, neither should you give.
-			The fields of output should be same as the fields of input, just modify them to be more descriptive.
-			Match the case with that of the input fields (everything in fieldname is lowercase.
-			Give a well formatted json object in return with all the five fields as given to you.`,
-		input.Title, input.Description.String, input.Status, input.Priority)
+	prompt := fmt.Sprintf(`You are an AI assistant for a task management platform.
+You will receive a JSON object representing a task.
+Your goal is to enhance the task details to be more clear, professional, and actionable.
+
+Input Task (JSON):
+%s
+
+Enhancement Rules:
+1. **Title:** Make it concise but descriptive.
+2. **Description:** Expand on the description to provide context, potential steps, or necessary details based on the title and existing description. Ensure it is well-formatted.
+3. **Consistency:** Ensure the 'status' and 'priority' match the context of the task. If the text implies urgency, ensure priority is 'high'.
+4. **Structure:** Return the EXACT same JSON structure (fields and types) as the input. Do not add or remove fields. Only modify the values of 'title', 'description' (including 'String' and 'Valid' fields inside it), 'status', and 'priority' if needed. Preserve all IDs and dates.
+
+Return ONLY the raw JSON string. No markdown formatting.`, string(inputBytes))
 
 	result, err := client.Models.GenerateContent(
 		ctx,
@@ -65,7 +57,7 @@ func Describe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(result.Text())
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result.Text())
+	// The result.Text() should be the JSON string. We write it directly.
+	w.Write([]byte(result.Text()))
 }

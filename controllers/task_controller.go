@@ -319,3 +319,34 @@ func (t *TaskHandler) DeleteTaskByID(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (t *TaskHandler) EnhanceTask(w http.ResponseWriter, r *http.Request) {
+	requester_id, ok := r.Context().Value(middleware.UserIDKey).(int)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	params := mux.Vars(r)
+	task_id, err := strconv.Atoi(params["id"])
+
+	if err != nil {
+		http.Error(w, "Invalid task_id", http.StatusBadRequest)
+		return
+	}
+
+	task, err := t.store.GetTaskByTaskID(task_id)
+	if requester_id != task.CreatorID {
+		http.Error(w, "Only the creator can use copilot to enhance task", http.StatusUnauthorized)
+		return
+	}
+
+	enhanced_task, err := store.EnhanceTask(task)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(enhanced_task)
+}

@@ -226,6 +226,7 @@ func main() {
 	api.HandleFunc("/tasks", k.CreateTask).Methods("POST")
 	api.HandleFunc("/tasks/{id}", k.UpdateTaskByID).Methods("PUT")
 	api.HandleFunc("/tasks/{id}", k.DeleteTaskByID).Methods("DELETE")
+	api.HandleFunc("/tasks/enhance/{id}", k.EnhanceTask).Methods("POST")
 
 	// Comment routes
 	api.HandleFunc("/comments", c.CreateComment).Methods("POST")
@@ -236,8 +237,6 @@ func main() {
 	// Message routes
 	api.HandleFunc("/messages", msgCtrl.GetMessagesByTeamID).Methods("GET").Queries("team_id", "{id}")
 
-	// Copilot route
-	api.HandleFunc("/enhance", controllers.Describe).Methods("POST")
 	// --- Start Server ---
 	port := os.Getenv("PORT")
 	if port == "" {
