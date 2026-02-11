@@ -3,9 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -21,6 +24,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hibiken/asynq"
 	"github.com/joho/godotenv"
+	"golang.org/x/time/rate"
 )
 
 // Upgrader is used to upgrade HTTP connection to a websocket
@@ -115,6 +119,40 @@ func wsHandler(hub *ws.Hub, s *store.Store, w http.ResponseWriter, r *http.Reque
 	}
 }
 
+func getIP(r *http.Request) string {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		log.Printf("Error parsing IP: %s\n", err)
+		return ""
+	}
+	return host
+}
+
+func rateLimitMiddleware(next http.Handler, limit rate.Limit, burst int) http.Handler {
+	var mu sync.Mutex
+	ipLimiterMap := make(map[string]*rate.Limiter)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Fetch IP of client
+		ip := getIP(r)
+
+		mu.Lock()
+		limiter, exists := ipLimiterMap[ip]
+		if !exists {
+			limiter = rate.NewLimiter(limit, burst)
+			ipLimiterMap[ip] = limiter
+		}
+		mu.Unlock()
+
+		if !limiter.Allow() {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusTooManyRequests)
+			json.NewEncoder(w).Encode(map[string]string{"error": "Too many requests"})
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	logs.InitLogger()
 	defer logs.Sync()
@@ -168,6 +206,7 @@ func main() {
 	defer database.CloseRedis(rdb)
 
 	r := mux.NewRouter()
+	handler := rateLimitMiddleware(r, rate.Limit(2), 10)
 	wsHub := ws.NewHub()
 
 	u := controllers.NewUserHandler(s, client)
@@ -245,7 +284,7 @@ func main() {
 
 	httpServer := &http.Server{
 		Addr:    ":" + port,
-		Handler: middleware.CORSMiddleware(r),
+		Handler: middleware.CORSMiddleware(handler),
 	}
 
 	// Create a channel to listen for OS signals
