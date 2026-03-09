@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import CreateTeamForm from "./CreateTeamForm";
 import EditTeamForm from "./EditTeamForm";
 import AddMemberForm from "./AddMemberForm";
-import { Plus, Users, Pencil, UserPlus } from "lucide-react";
+import { Plus, Users, Pencil, UserPlus, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LeftBar = () => {
@@ -14,6 +14,7 @@ const LeftBar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
   const [addingMemberTeam, setAddingMemberTeam] = useState(null);
+  const [copiedTeamId, setCopiedTeamId] = useState(null);
   const { user } = useAuth();
   const { setSelectedTeam, selectedTeam } = useTeam();
   const token = user?.token;
@@ -51,6 +52,21 @@ const LeftBar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, isModalOpen, editingTeam]); // Refetch on modal close (after create or edit)
 
+  const copyTeamCode = async (e, team) => {
+    e.stopPropagation();
+    if (!team?.team_code) return;
+
+    try {
+      await navigator.clipboard.writeText(team.team_code);
+      setCopiedTeamId(team.team_id);
+      setTimeout(() => {
+        setCopiedTeamId(null);
+      }, 1500);
+    } catch (error) {
+      console.error("Failed to copy team code", error);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
@@ -87,7 +103,7 @@ const LeftBar = () => {
             <CardHeader className="p-4">
               <div className="flex justify-between items-start">
                 <CardTitle className="text-base font-medium leading-none">
-                  {team.team_code || team.team_name}
+                  {team.team_name}
                 </CardTitle>
                 <div className="absolute right-2 top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {user?.user_id === team.team_leader_id && (
@@ -121,6 +137,30 @@ const LeftBar = () => {
               <CardDescription className="text-xs mt-1.5 truncate">
                 Leader: {team.team_leader_name || team.team_leader_id}
               </CardDescription>
+              {team.team_code && (
+                <div className="mt-2 flex items-center justify-between rounded-md border border-border/60 bg-muted/30 px-2 py-1">
+                  <span className="font-mono text-xs tracking-wider">
+                    {team.team_code}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    title={
+                      copiedTeamId === team.team_id
+                        ? "Copied"
+                        : "Copy team code"
+                    }
+                    onClick={(e) => copyTeamCode(e, team)}
+                  >
+                    {copiedTeamId === team.team_id ? (
+                      <Check className="w-3.5 h-3.5 text-green-500" />
+                    ) : (
+                      <Copy className="w-3.5 h-3.5" />
+                    )}
+                  </Button>
+                </div>
+              )}
             </CardHeader>
           </Card>
         ))}

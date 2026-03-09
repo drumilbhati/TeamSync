@@ -111,7 +111,7 @@ const MidBar = () => {
       <div className="p-4 border-b border-border bg-muted/20 backdrop-blur-sm sticky top-0 z-10">
         <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
           <MessageSquare className="w-5 h-5" />
-          {selectedTeam.team_code || selectedTeam.team_name}
+          {selectedTeam.team_name}
         </h2>
       </div>
 
@@ -165,7 +165,7 @@ const MidBar = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={`Message ${selectedTeam.team_code || selectedTeam.team_name}...`}
+            placeholder={`Message ${selectedTeam.team_name}...`}
             className="flex-1 bg-muted/50 focus-visible:ring-primary"
           />
           <Button type="submit" size="icon" disabled={!input.trim()}>

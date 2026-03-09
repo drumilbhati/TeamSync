@@ -65,8 +65,7 @@ const AddMemberForm = ({ team, onClose }) => {
       <CardHeader>
         <CardTitle>Add Team Member</CardTitle>
         <CardDescription>
-          Add a new member to{" "}
-          <strong>{team.team_code || team.team_name}</strong>
+          Add a new member to <strong>{team.team_name}</strong>
         </CardDescription>
       </CardHeader>
       <CardContent>

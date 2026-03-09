@@ -117,7 +117,7 @@ const RightBar = () => {
         <div>
           <h2 className="text-xl font-semibold tracking-tight">Tasks</h2>
           <p className="text-xs text-muted-foreground">
-            {selectedTeam.team_code || selectedTeam.team_name}
+            {selectedTeam.team_name}
           </p>
         </div>
         <Button
