@@ -20,29 +20,32 @@ const LeftBar = () => {
 
   useEffect(() => {
     const fetchTeams = async () => {
-        if (!token) return;
-        try {
+      if (!token) return;
+      try {
         const response = await fetch("/api/teams", {
-            method: "GET",
-            headers: {
+          method: "GET",
+          headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
-            },
+          },
         });
 
         if (response.ok) {
-            const data = await response.json();
-            const fetchedTeams = data || [];
-            setTeams(fetchedTeams);
+          const data = await response.json();
+          const fetchedTeams = data || [];
+          setTeams(fetchedTeams);
 
-            // If selected team is no longer in the list (e.g. deleted), clear selection
-            if (selectedTeam && !fetchedTeams.find(t => t.team_id === selectedTeam.team_id)) {
-              setSelectedTeam(null);
-            }
+          // If selected team is no longer in the list (e.g. deleted), clear selection
+          if (
+            selectedTeam &&
+            !fetchedTeams.find((t) => t.team_id === selectedTeam.team_id)
+          ) {
+            setSelectedTeam(null);
+          }
         }
-        } catch (error) {
+      } catch (error) {
         console.log(error);
-        }
+      }
     };
     fetchTeams();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -52,66 +55,68 @@ const LeftBar = () => {
     <div className="flex flex-col h-full">
       <div className="p-4 border-b border-border flex items-center justify-between bg-muted/20">
         <h2 className="text-xl font-semibold tracking-tight flex items-center gap-2">
-            <Users className="w-5 h-5" /> Teams
+          <Users className="w-5 h-5" /> Teams
         </h2>
         <Button
-            size="icon"
-            variant="ghost"
-            onClick={() => setIsModalOpen(true)}
-            title="Create new team"
+          size="icon"
+          variant="ghost"
+          onClick={() => setIsModalOpen(true)}
+          title="Create new team"
         >
-            <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5" />
         </Button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {teams.length === 0 && (
-            <div className="text-center text-muted-foreground text-sm py-8">
-                No teams found. Create one to get started.
-            </div>
+          <div className="text-center text-muted-foreground text-sm py-8">
+            No teams found. Create one to get started.
+          </div>
         )}
         {teams.map((team) => (
           <Card
             key={team.team_id}
             onClick={() => setSelectedTeam(team)}
             className={cn(
-                "cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground border-transparent hover:border-border group relative",
-                selectedTeam?.team_id === team.team_id ? "bg-accent border-primary/50 ring-1 ring-primary/20" : "bg-card"
+              "cursor-pointer transition-all hover:bg-accent hover:text-accent-foreground border-transparent hover:border-border group relative",
+              selectedTeam?.team_id === team.team_id
+                ? "bg-accent border-primary/50 ring-1 ring-primary/20"
+                : "bg-card",
             )}
           >
             <CardHeader className="p-4">
               <div className="flex justify-between items-start">
-                  <CardTitle className="text-base font-medium leading-none">
-                    {team.team_name}
-                  </CardTitle>
-                  <div className="absolute right-2 top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {user?.user_id === team.team_leader_id && (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            title="Add Member"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setAddingMemberTeam(team);
-                            }}
-                        >
-                            <UserPlus className="w-3 h-3" />
-                        </Button>
-                      )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-6 w-6"
-                        title="Edit Team"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingTeam(team);
-                        }}
-                      >
-                          <Pencil className="w-3 h-3" />
-                      </Button>
-                  </div>
+                <CardTitle className="text-base font-medium leading-none">
+                  {team.team_code || team.team_name}
+                </CardTitle>
+                <div className="absolute right-2 top-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {user?.user_id === team.team_leader_id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      title="Add Member"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAddingMemberTeam(team);
+                      }}
+                    >
+                      <UserPlus className="w-3 h-3" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    title="Edit Team"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingTeam(team);
+                    }}
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </Button>
+                </div>
               </div>
               <CardDescription className="text-xs mt-1.5 truncate">
                 Leader: {team.team_leader_name || team.team_leader_id}
