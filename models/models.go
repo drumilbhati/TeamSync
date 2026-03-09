@@ -28,6 +28,7 @@ type Member struct {
 
 type Team struct {
 	TeamID         int       `json:"team_id"`
+	TeamCode       string    `json:"team_code"`
 	TeamName       string    `json:"team_name"`
 	TeamLeaderID   int       `json:"team_leader_id"`
 	TeamLeaderName string    `json:"team_leader_name,omitempty"`

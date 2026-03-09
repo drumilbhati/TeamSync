@@ -1,3 +1,23 @@
+-- Base36Encoding
+CREATE OR REPLACE FUNCTION base36_encode(num BIGINT)
+RETURNS TEXT AS $$
+DECLARE
+    alphabet TEXT :=    '3gq8h2x1u9r7kcltaznwef5d0v4mibsy6opj';
+    result TEXT := '';
+BEGIN
+    IF num = 0 THEN
+        RETURN '0';
+    END IF;
+
+    WHILE num > 0 LOOP
+        result := substr(alphabet, (num % 36) + 1, 1) || result;
+        num := num / 36;
+    END LOOP;
+
+    RETURN result;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
 -- Users Table
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
@@ -13,6 +33,9 @@ CREATE TABLE IF NOT EXISTS users (
 -- Teams Table
 CREATE TABLE IF NOT EXISTS teams (
     team_id SERIAL PRIMARY KEY,
+    team_code VARCHAR(9) GENERATED ALWAYS AS (
+        lpad(base36_encode(team_id), 9, '0')
+    ) STORED UNIQUE NOT NULL,
     team_name VARCHAR(255) NOT NULL,
     team_leader_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

@@ -27,12 +27,12 @@ Given a team_id return the entire team
 func (s *Store) GetTeamByID(team_id int) (*models.Team, error) {
 	var team models.Team
 	err := s.db.QueryRow(
-		`SELECT t.team_id, t.team_name, t.team_leader_id, u.user_name, t.created_at 
+		`SELECT t.team_id, t.team_code, t.team_name, t.team_leader_id, u.user_name, t.created_at
 		FROM teams t
 		JOIN users u ON t.team_leader_id = u.user_id
 		WHERE t.team_id = $1`,
 		team_id,
-	).Scan(&team.TeamID, &team.TeamName, &team.TeamLeaderID, &team.TeamLeaderName, &team.CreatedAt)
+	).Scan(&team.TeamID, &team.TeamCode, &team.TeamName, &team.TeamLeaderID, &team.TeamLeaderName, &team.CreatedAt)
 
 	if err != nil {
 		return nil, err
@@ -67,8 +67,8 @@ handles for team_leader_id as well, since team_leader_id references user_id
 func (s *Store) GetTeamsByTeamLeaderID(team_leader_id int) ([]models.Team, error) {
 	var teams = make([]models.Team, 0)
 	rows, err := s.db.Query(
-		`SELECT t.team_id, t.team_name, t.team_leader_id, u.user_name, t.created_at
-			FROM teams t 
+		`SELECT t.team_id, t.team_code, t.team_name, t.team_leader_id, u.user_name, t.created_at
+			FROM teams t
 			JOIN users u ON t.team_leader_id = u.user_id
 			WHERE t.team_leader_id = $1
 		`,
@@ -82,7 +82,7 @@ func (s *Store) GetTeamsByTeamLeaderID(team_leader_id int) ([]models.Team, error
 
 	for rows.Next() {
 		var t models.Team
-		if err := rows.Scan(&t.TeamID, &t.TeamName, &t.TeamLeaderID, &t.TeamLeaderName, &t.CreatedAt); err != nil {
+		if err := rows.Scan(&t.TeamID, &t.TeamCode, &t.TeamName, &t.TeamLeaderID, &t.TeamLeaderName, &t.CreatedAt); err != nil {
 			return nil, err
 		}
 		teams = append(teams, t)
@@ -93,7 +93,7 @@ func (s *Store) GetTeamsByTeamLeaderID(team_leader_id int) ([]models.Team, error
 func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
 	teams := []models.Team{}
 	rows, err := s.db.Query(
-		`SELECT DISTINCT t.team_id, t.team_name, t.team_leader_id, u.user_name, t.created_at
+		`SELECT DISTINCT t.team_id, t.team_code, t.team_name, t.team_leader_id, u.user_name, t.created_at
 		FROM teams t
 		LEFT JOIN members m ON t.team_id = m.team_id
 		JOIN users u ON t.team_leader_id = u.user_id
@@ -109,7 +109,7 @@ func (s *Store) GetTeamsByUserID(user_id int) ([]models.Team, error) {
 	for rows.Next() {
 		var t models.Team
 		t.Members = []models.Member{}
-		if err := rows.Scan(&t.TeamID, &t.TeamName, &t.TeamLeaderID, &t.TeamLeaderName, &t.CreatedAt); err != nil {
+		if err := rows.Scan(&t.TeamID, &t.TeamCode, &t.TeamName, &t.TeamLeaderID, &t.TeamLeaderName, &t.CreatedAt); err != nil {
 			return nil, err
 		}
 		teams = append(teams, t)
@@ -131,9 +131,9 @@ func (s *Store) CreateTeam(t *models.Team) error {
 	err = tx.QueryRow(
 		`INSERT INTO teams (team_name, team_leader_id)
 		VALUES ($1, $2)
-		RETURNING team_id, created_at`,
+		RETURNING team_id, team_code, created_at`,
 		t.TeamName, t.TeamLeaderID,
-	).Scan(&t.TeamID, &t.CreatedAt)
+	).Scan(&t.TeamID, &t.TeamCode, &t.CreatedAt)
 
 	if err != nil {
 		return err
